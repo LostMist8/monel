@@ -1,0 +1,5 @@
+/target
+*.tmp.*
+*.yaml.tmp.*
+config.test.yaml
+nul

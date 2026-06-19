@@ -1,0 +1,18 @@
+# Project-local cargo config.
+#
+# Overrides the user's global config, which points at the Tuna *git* index.
+# The git index inherits the git CLI's http.proxy (set to 127.0.0.1:7897,
+# a local proxy that is often offline), so cargo fails to update the index.
+#
+# Using a sparse HTTPS index sidesteps the git CLI entirely; libgit2/reqwest
+# respects the real environment instead. Aliyun's sparse mirror is already
+# listed in the user's global config, so we reuse it here.
+
+[registries.crates-io]
+protocol = "sparse"
+
+[source.crates-io]
+replace-with = "aliyun"
+
+[source.aliyun]
+registry = "sparse+https://mirrors.aliyun.com/crates.io-index/"
