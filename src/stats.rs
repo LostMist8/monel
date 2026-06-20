@@ -2,7 +2,7 @@
 
 use axum::{extract::State, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::RwLock;
@@ -50,7 +50,7 @@ pub struct StatsResponse {
 
 #[derive(Debug)]
 pub struct Stats {
-    logs: Vec<RequestLog>,
+    logs: VecDeque<RequestLog>,
     provider_stats: HashMap<String, ProviderStats>,
     model_stats: HashMap<String, ModelStats>,
     total_requests: u64,
@@ -61,7 +61,7 @@ pub struct Stats {
 impl Stats {
     pub fn new() -> Self {
         Self {
-            logs: Vec::new(),
+            logs: VecDeque::new(),
             provider_stats: HashMap::new(),
             model_stats: HashMap::new(),
             total_requests: 0,
@@ -78,20 +78,22 @@ impl Stats {
         }
 
         // Update provider stats
-        let provider_stat = self.provider_stats
-            .entry(log.provider.clone())
-            .or_insert(ProviderStats {
-                request_count: 0,
-                total_duration_ms: 0,
-                avg_duration_ms: 0,
-                min_duration_ms: u64::MAX,
-                max_duration_ms: 0,
-                error_count: 0,
-            });
+        let provider_stat =
+            self.provider_stats
+                .entry(log.provider.clone())
+                .or_insert(ProviderStats {
+                    request_count: 0,
+                    total_duration_ms: 0,
+                    avg_duration_ms: 0,
+                    min_duration_ms: u64::MAX,
+                    max_duration_ms: 0,
+                    error_count: 0,
+                });
 
         provider_stat.request_count += 1;
         provider_stat.total_duration_ms += log.duration_ms;
-        provider_stat.avg_duration_ms = provider_stat.total_duration_ms / provider_stat.request_count;
+        provider_stat.avg_duration_ms =
+            provider_stat.total_duration_ms / provider_stat.request_count;
         provider_stat.min_duration_ms = provider_stat.min_duration_ms.min(log.duration_ms);
         provider_stat.max_duration_ms = provider_stat.max_duration_ms.max(log.duration_ms);
 
@@ -100,7 +102,8 @@ impl Stats {
         }
 
         // Update model stats
-        let model_stat = self.model_stats
+        let model_stat = self
+            .model_stats
             .entry(log.model.clone())
             .or_insert(ModelStats {
                 request_count: 0,
@@ -113,9 +116,9 @@ impl Stats {
         model_stat.avg_duration_ms = model_stat.total_duration_ms / model_stat.request_count;
 
         // Add to logs (keep last N)
-        self.logs.push(log);
+        self.logs.push_back(log);
         if self.logs.len() > self.max_logs {
-            self.logs.remove(0);
+            self.logs.pop_front();
         }
     }
 
@@ -134,7 +137,7 @@ impl Stats {
         } else {
             0
         };
-        self.logs[start..].to_vec()
+        self.logs.iter().skip(start).cloned().collect()
     }
 }
 
@@ -174,7 +177,11 @@ pub async fn record_request(
     usage: Option<crate::proxy::TokenUsage>,
 ) {
     let (input_tokens, output_tokens, cache_read_input_tokens) = match usage {
-        Some(u) => (Some(u.input_tokens), Some(u.output_tokens), Some(u.cache_read_input_tokens)),
+        Some(u) => (
+            Some(u.input_tokens),
+            Some(u.output_tokens),
+            Some(u.cache_read_input_tokens),
+        ),
         None => (None, None, None),
     };
 

@@ -15,7 +15,7 @@ use crate::state::AppState;
 
 /// `GET /admin/config`.
 pub async fn get_config(State(state): State<AppState>) -> AppResult<impl IntoResponse> {
-    let cfg = crate::config::read(&state.config).clone();
+    let cfg = crate::config::read(&state.config).await.clone();
     Ok(Json(cfg))
 }
 
@@ -24,7 +24,9 @@ pub async fn post_config(
     State(state): State<AppState>,
     Json(new_config): Json<Config>,
 ) -> AppResult<impl IntoResponse> {
-    new_config.validate().map_err(|e| AppError::bad_request(e.to_string()))?;
+    new_config
+        .validate()
+        .map_err(|e| AppError::bad_request(e.to_string()))?;
 
     // Persist first. If it fails, do not touch the live config.
     if let Err(e) = new_config.save(state.config_path.as_ref()) {
@@ -34,7 +36,7 @@ pub async fn post_config(
 
     // Update the live config. The file-watcher will also fire and reload,
     // but applying immediately means the change is visible without waiting.
-    crate::config::replace(&state.config, new_config.clone());
+    crate::config::replace(&state.config, new_config.clone()).await;
     tracing::info!("admin: config updated");
 
     Ok((StatusCode::OK, Json(new_config)))
@@ -45,7 +47,7 @@ pub async fn reload(State(state): State<AppState>) -> AppResult<impl IntoRespons
     let reloaded = Config::load(state.config_path.as_ref())
         .map_err(|e| AppError::internal(format!("reload failed: {e}")))?;
 
-    crate::config::replace(&state.config, reloaded.clone());
+    crate::config::replace(&state.config, reloaded.clone()).await;
     tracing::info!("admin: config reloaded from disk");
 
     Ok((StatusCode::OK, Json(reloaded)))

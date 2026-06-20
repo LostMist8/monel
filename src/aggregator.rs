@@ -33,11 +33,15 @@ pub struct ModelEntry {
 
 /// `GET /providers` — list configured providers without exposing api_key.
 pub async fn list_providers(State(state): State<AppState>) -> AppResult<impl IntoResponse> {
-    let cfg = crate::config::read(&state.config).clone();
+    let cfg = crate::config::read(&state.config).await.clone();
     let summaries: Vec<ProviderSummary> = cfg
         .providers
         .into_iter()
-        .map(|p| ProviderSummary { id: p.id, name: p.name, base_url: p.base_url })
+        .map(|p| ProviderSummary {
+            id: p.id,
+            name: p.name,
+            base_url: p.base_url,
+        })
         .collect();
     Ok(Json(summaries))
 }
@@ -47,9 +51,13 @@ pub async fn list_providers(State(state): State<AppState>) -> AppResult<impl Int
 /// Failing or slow providers are silently skipped; partial results are always
 /// returned.
 pub async fn list_models(State(state): State<AppState>) -> AppResult<impl IntoResponse> {
-    let cfg = crate::config::read(&state.config).clone();
+    let cfg = crate::config::read(&state.config).await.clone();
 
-    let futures = cfg.providers.iter().cloned().map(|p| fetch_models_for(state.http.clone(), p));
+    let futures = cfg
+        .providers
+        .iter()
+        .cloned()
+        .map(|p| fetch_models_for(state.http.clone(), p));
     let per_provider = join_all(futures).await;
 
     let mut out: Vec<ModelEntry> = Vec::new();
@@ -67,8 +75,14 @@ async fn fetch_models_for(http: reqwest::Client, provider: Provider) -> Option<V
     let result = async {
         let resp = http
             .get(&url)
-            .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", provider.api_key))
-            .header(reqwest::header::USER_AGENT, HeaderValue::from_static("monel-gateway/0.1"))
+            .header(
+                reqwest::header::AUTHORIZATION,
+                format!("Bearer {}", provider.api_key),
+            )
+            .header(
+                reqwest::header::USER_AGENT,
+                HeaderValue::from_static("monel-gateway/0.1"),
+            )
             .timeout(MODELS_FANOUT_TIMEOUT)
             .send()
             .await?;
@@ -81,7 +95,9 @@ async fn fetch_models_for(http: reqwest::Client, provider: Provider) -> Option<V
         // either an object-with-data or a bare array.
         let value: serde_json::Value = resp.json().await?;
         let arr: Vec<serde_json::Value> = match &value {
-            serde_json::Value::Object(map) if matches!(map.get("data"), Some(serde_json::Value::Array(_))) => {
+            serde_json::Value::Object(map)
+                if matches!(map.get("data"), Some(serde_json::Value::Array(_))) =>
+            {
                 match map.get("data") {
                     Some(serde_json::Value::Array(a)) => a.clone(),
                     _ => Vec::new(),

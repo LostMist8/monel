@@ -7,10 +7,15 @@ use axum::response::Response;
 
 use crate::error::AppError;
 use crate::state::AppState;
+use subtle::ConstantTimeEq;
 
 /// Middleware: requires a valid auth key from `?key=` or `Authorization: Bearer`.
 /// Internal token from Tauri frontend bypasses auth.
-pub async fn require_auth(State(state): State<AppState>, req: Request<axum::body::Body>, next: Next) -> Result<Response, AppError> {
+pub async fn require_auth(
+    State(state): State<AppState>,
+    req: Request<axum::body::Body>,
+    next: Next,
+) -> Result<Response, AppError> {
     // Check if request has internal token (from Tauri frontend)
     if let Some(key) = extract_key(&req)? {
         // Priority 1: Check internal token (Tauri frontend)
@@ -21,7 +26,7 @@ pub async fn require_auth(State(state): State<AppState>, req: Request<axum::body
 
     // Priority 2: Check user-configured auth_key (external requests)
     let expected = {
-        let cfg = crate::config::read(&state.config);
+        let cfg = crate::config::read(&state.config).await;
         cfg.server.auth_key.clone()
     };
 
@@ -75,10 +80,9 @@ fn percent_decode(s: &str) -> String {
     let mut i = 0;
     while i < bytes.len() {
         if bytes[i] == b'%' && i + 2 < bytes.len() {
-            if let Ok(b) = u8::from_str_radix(
-                std::str::from_utf8(&bytes[i + 1..i + 3]).unwrap_or(""),
-                16,
-            ) {
+            if let Ok(b) =
+                u8::from_str_radix(std::str::from_utf8(&bytes[i + 1..i + 3]).unwrap_or(""), 16)
+            {
                 out.push(b);
                 i += 3;
                 continue;
@@ -95,12 +99,5 @@ fn percent_decode(s: &str) -> String {
 }
 
 fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
-    if a.len() != b.len() {
-        return false;
-    }
-    let mut diff = 0u8;
-    for (x, y) in a.iter().zip(b.iter()) {
-        diff |= x ^ y;
-    }
-    diff == 0
+    a.ct_eq(b).into()
 }

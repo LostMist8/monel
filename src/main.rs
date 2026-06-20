@@ -59,9 +59,7 @@ async fn main() -> Result<()> {
 }
 
 fn print_usage() {
-    eprintln!(
-        "Usage:\n  gateway server [--config <path>]\n  gateway ui\n  gateway --help"
-    );
+    eprintln!("Usage:\n  gateway server [--config <path>]\n  gateway ui\n  gateway --help");
 }
 
 /// Parse `--config <path>` (default `./config.yaml`).
@@ -103,7 +101,13 @@ async fn run_server(args: std::iter::Skip<std::env::Args>) -> Result<()> {
     // Create stats tracker
     let stats = Arc::new(RwLock::new(Stats::new()));
 
-    let state = AppState::new(shared.clone(), http, config_path.clone(), internal_token, stats);
+    let state = AppState::new(
+        shared.clone(),
+        http,
+        config_path.clone(),
+        internal_token,
+        stats,
+    );
 
     // Hot reload watcher.
     spawn_config_watcher(shared.clone(), config_path.clone());
@@ -111,7 +115,7 @@ async fn run_server(args: std::iter::Skip<std::env::Args>) -> Result<()> {
     let app = build_router(state.clone());
 
     let (host, port) = {
-        let cfg = config::read(&shared);
+        let cfg = config::read(&shared).await;
         (cfg.server.host.clone(), cfg.server.port)
     };
     let addr: std::net::SocketAddr = format!("{host}:{port}")
@@ -137,11 +141,17 @@ fn build_router(state: AppState) -> Router {
         .route("/chat/:provider_id/*path", axum::routing::any(proxy::proxy))
         .route("/models", axum::routing::get(aggregator::list_models))
         .route("/providers", axum::routing::get(aggregator::list_providers))
-        .route("/admin/config", axum::routing::get(admin::get_config).post(admin::post_config))
+        .route(
+            "/admin/config",
+            axum::routing::get(admin::get_config).post(admin::post_config),
+        )
         .route("/admin/reload", axum::routing::post(admin::reload))
         .route("/admin/stats", axum::routing::get(stats::get_stats))
         .route("/admin/logs", axum::routing::get(stats::get_logs))
-        .layer(middleware::from_fn_with_state(state.clone(), auth::require_auth));
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth::require_auth,
+        ));
 
     Router::<AppState>::new()
         // Health is public (no auth).
@@ -217,7 +227,11 @@ fn build_watcher(
 }
 
 /// Consumer loop: debounces bursts, reloads config, keeps the previous one on error.
-async fn run_reload_loop(shared: SharedConfig, config_path: PathBuf, mut rx: tokio::sync::mpsc::Receiver<()>) {
+async fn run_reload_loop(
+    shared: SharedConfig,
+    config_path: PathBuf,
+    mut rx: tokio::sync::mpsc::Receiver<()>,
+) {
     while rx.recv().await.is_some() {
         // Debounce: collapse bursts into a single reload after 300ms of quiet.
         tokio::time::sleep(Duration::from_millis(300)).await;
@@ -227,11 +241,11 @@ async fn run_reload_loop(shared: SharedConfig, config_path: PathBuf, mut rx: tok
         match Config::load(&config_path) {
             Ok(new_cfg) => {
                 let changed = {
-                    let cur = config::read(&shared);
-                    !config_equal(&cur, &new_cfg)
+                    let cur = config::read(&shared).await;
+                    *cur != new_cfg
                 };
                 if changed {
-                    config::replace(&shared, new_cfg);
+                    config::replace(&shared, new_cfg).await;
                     tracing::info!("config reloaded from {}", config_path.display());
                 }
             }
@@ -243,20 +257,6 @@ async fn run_reload_loop(shared: SharedConfig, config_path: PathBuf, mut rx: tok
             }
         }
     }
-}
-
-/// Cheap structural equality for "did the config actually change?"
-fn config_equal(a: &Config, b: &Config) -> bool {
-    a.server.host == b.server.host
-        && a.server.port == b.server.port
-        && a.server.auth_key == b.server.auth_key
-        && a.providers.len() == b.providers.len()
-        && a.providers.iter().zip(b.providers.iter()).all(|(x, y)| {
-            x.id == y.id
-                && x.name == y.name
-                && x.base_url == y.base_url
-                && x.api_key == y.api_key
-        })
 }
 
 /// Compare two paths, tolerating canonicalization differences.

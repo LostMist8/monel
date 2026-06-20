@@ -1,10 +1,11 @@
 //! Configuration types, persistence, and the shared mutable config handle.
 
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
+use tokio::sync::RwLock;
 
 /// Process-wide shared, hot-reloadable configuration.
 pub type SharedConfig = Arc<RwLock<Config>>;
@@ -14,14 +15,14 @@ pub fn new_shared(config: Config) -> SharedConfig {
     Arc::new(RwLock::new(config))
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Config {
     pub server: ServerConfig,
     #[serde(default)]
     pub providers: Vec<Provider>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ServerConfig {
     #[serde(default = "default_host")]
     pub host: String,
@@ -31,7 +32,7 @@ pub struct ServerConfig {
     pub auth_key: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Provider {
     pub id: String,
     pub name: String,
@@ -47,18 +48,8 @@ fn default_port() -> u16 {
     7890
 }
 
-impl Config {
-    /// Read and parse a YAML config file.
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let raw = std::fs::read_to_string(&path)
-            .with_context(|| format!("failed to read config file: {}", path.as_ref().display()))?;
-        let config: Config = serde_yaml::from_str(&raw).context("failed to parse config YAML")?;
-        config.validate()?;
-        Ok(config)
-    }
-
-    /// Create a default configuration
-    pub fn default() -> Self {
+impl Default for Config {
+    fn default() -> Self {
         Self {
             server: ServerConfig {
                 host: default_host(),
@@ -67,6 +58,17 @@ impl Config {
             },
             providers: Vec::new(),
         }
+    }
+}
+
+impl Config {
+    /// Read and parse a YAML config file.
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let raw = std::fs::read_to_string(&path)
+            .with_context(|| format!("failed to read config file: {}", path.as_ref().display()))?;
+        let config: Config = serde_yaml::from_str(&raw).context("failed to parse config YAML")?;
+        config.validate()?;
+        Ok(config)
     }
 
     /// Write the config to disk atomically (write to temp file, then rename).
@@ -112,18 +114,20 @@ impl Config {
     }
 }
 
-/// Read the current config under a read lock. Panics only on lock poisoning.
-pub fn read(shared: &SharedConfig) -> std::sync::RwLockReadGuard<'_, Config> {
-    shared.read().expect("config lock poisoned")
+/// Read the current config under a read lock.
+pub async fn read(shared: &SharedConfig) -> tokio::sync::RwLockReadGuard<'_, Config> {
+    shared.read().await
 }
 
 /// Replace the live config under a write lock.
-pub fn replace(shared: &SharedConfig, config: Config) {
-    let mut guard = shared.write().expect("config lock poisoned");
+pub async fn replace(shared: &SharedConfig, config: Config) {
+    let mut guard = shared.write().await;
     *guard = config;
 }
 
 /// Path canonicalized for watcher event matching (falls back to input on failure).
 pub fn canonicalize(path: impl AsRef<Path>) -> PathBuf {
-    path.as_ref().canonicalize().unwrap_or_else(|_| path.as_ref().to_path_buf())
+    path.as_ref()
+        .canonicalize()
+        .unwrap_or_else(|_| path.as_ref().to_path_buf())
 }

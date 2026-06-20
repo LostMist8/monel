@@ -11,4 +11,7 @@ providers:
   name: 智谱GLM
   base_url: https://open.bigmodel.cn/api/paas/v4
   api_key: zhipu-key
-
+- id: ikun
+  name: Ikun
+  base_url: https://api.ikuncode.cc/v1
+  api_key: your-ikun-api-key

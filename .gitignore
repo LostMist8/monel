@@ -2,6 +2,8 @@
 *.tmp.*
 *.yaml.tmp.*
 config.test.yaml
+config.local.yaml
+.env
 nul
 server.log
 .codegraph/

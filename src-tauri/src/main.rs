@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Arc;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 use tauri::Manager;
 use tokio::sync::RwLock;
@@ -56,10 +56,11 @@ fn main() {
             tracing::info!("Generated internal token for Tauri frontend");
 
             let token_clone = internal_token.clone();
+            let app_handle = app.handle().clone();
 
             // Start backend server in background
             tauri::async_runtime::spawn(async move {
-                if let Err(e) = start_backend_server(token_clone).await {
+                if let Err(e) = start_backend_server(token_clone, app_handle).await {
                     tracing::error!("Backend server error: {}", e);
                 }
             });
@@ -77,9 +78,11 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-async fn start_backend_server(internal_token: Arc<String>) -> anyhow::Result<()> {
-    // Config is in project root (parent of src-tauri)
-    let config_path = PathBuf::from("../config.yaml");
+async fn start_backend_server(
+    internal_token: Arc<String>,
+    app: tauri::AppHandle,
+) -> anyhow::Result<()> {
+    let config_path = resolve_config_path(&app)?;
 
     let initial = Config::load(&config_path)
         .unwrap_or_else(|e| {
@@ -113,6 +116,41 @@ async fn start_backend_server(internal_token: Arc<String>) -> anyhow::Result<()>
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+fn resolve_config_path(app: &tauri::AppHandle) -> anyhow::Result<PathBuf> {
+    let config_dir = app.path().app_config_dir()?;
+    std::fs::create_dir_all(&config_dir)?;
+
+    let config_path = config_dir.join("config.yaml");
+    if config_path.exists() {
+        return Ok(config_path);
+    }
+
+    if let Some(dev_config) = find_dev_config() {
+        std::fs::copy(&dev_config, &config_path)?;
+        tracing::info!(
+            "Copied development config from {} to {}",
+            dev_config.display(),
+            config_path.display()
+        );
+    } else {
+        Config::default().save(&config_path)?;
+        tracing::info!("Created default config at {}", config_path.display());
+    }
+
+    Ok(config_path)
+}
+
+fn find_dev_config() -> Option<PathBuf> {
+    let cwd = std::env::current_dir().ok()?;
+    [
+        cwd.join("config.yaml"),
+        cwd.join("..").join("config.yaml"),
+        cwd.join("src-tauri").join("config.yaml"),
+    ]
+    .into_iter()
+    .find(|path| path.exists())
 }
 
 fn build_router(state: AppState) -> Router {

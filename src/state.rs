@@ -38,7 +38,7 @@ impl AppState {
 
     /// Current config snapshot (cheap clone under a read lock).
     #[allow(dead_code)]
-    pub fn snapshot(&self) -> crate::config::Config {
-        crate::config::read(&self.config).clone()
+    pub async fn snapshot(&self) -> crate::config::Config {
+        crate::config::read(&self.config).await.clone()
     }
 }

@@ -6,4 +6,4 @@ providers:
 - id: Ikun-test
   name: Claude-Ikun
   base_url: https://api.ikuncode.cc/v1
-  api_key: sk-ontZwmIfTxZzPTP8gTCKTV4wkZEYJ3cK82x0W2XtmEOlEnAn
+  api_key: your-ikun-api-key
