@@ -57,6 +57,18 @@ impl Config {
         Ok(config)
     }
 
+    /// Create a default configuration
+    pub fn default() -> Self {
+        Self {
+            server: ServerConfig {
+                host: default_host(),
+                port: default_port(),
+                auth_key: String::new(),
+            },
+            providers: Vec::new(),
+        }
+    }
+
     /// Write the config to disk atomically (write to temp file, then rename).
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let path = path.as_ref();

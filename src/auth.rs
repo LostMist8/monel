@@ -9,7 +9,17 @@ use crate::error::AppError;
 use crate::state::AppState;
 
 /// Middleware: requires a valid auth key from `?key=` or `Authorization: Bearer`.
+/// Internal token from Tauri frontend bypasses auth.
 pub async fn require_auth(State(state): State<AppState>, req: Request<axum::body::Body>, next: Next) -> Result<Response, AppError> {
+    // Check if request has internal token (from Tauri frontend)
+    if let Some(key) = extract_key(&req)? {
+        // Priority 1: Check internal token (Tauri frontend)
+        if constant_time_eq(key.as_bytes(), state.internal_token.as_bytes()) {
+            return Ok(next.run(req).await);
+        }
+    }
+
+    // Priority 2: Check user-configured auth_key (external requests)
     let expected = {
         let cfg = crate::config::read(&state.config);
         cfg.server.auth_key.clone()

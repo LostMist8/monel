@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Monel Gateway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Refined palette - neutral base with single accent */
+      --color-bg-primary: #0a0a0a;
+      --color-bg-secondary: #111111;
+      --color-bg-elevated: #1a1a1a;
+      --color-bg-hover: #222222;
+
+      --color-text-primary: #e5e5e5;
+      --color-text-secondary: #a3a3a3;
+      --color-text-tertiary: #737373;
+
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-muted: rgba(59, 130, 246, 0.1);
+
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-error: #ef4444;
+
+      --color-border: #262626;
+      --color-border-strong: #404040;
+
+      /* Typography */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+
+      /* Shadows - tinted to match dark background */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.4);
+
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* App Shell */
+    .app-container {
+      display: flex;
+      min-height: 100dvh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--color-bg-secondary);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .sidebar-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 8px var(--color-accent);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: var(--spacing-md) 0;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .nav-section-title {
+      padding: 0 var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      margin: 0 var(--spacing-sm);
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--color-accent-muted);
+      color: var(--color-accent);
+    }
+
+    .nav-item:active {
+      transform: scale(0.98);
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    .page-header {
+      padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--spacing-xs);
+      color: var(--color-text-primary);
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    .page-content {
+      flex: 1;
+      padding: var(--spacing-xl);
+      overflow-y: auto;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-accent), transparent);
+    }
+
+    .stat-card:hover {
+      border-color: var(--color-border-strong);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .stat-change {
+      margin-top: var(--spacing-sm);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .stat-change.up {
+      color: var(--color-success);
+    }
+
+    .stat-change.down {
+      color: var(--color-error);
+    }
+
+    /* Card */
+    .card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text-primary);
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+      padding: var(--spacing-md) var(--spacing-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .data-table td {
+      padding: var(--spacing-md) var(--spacing-sm);
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: var(--color-bg-elevated);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-border-strong);
+      background: var(--color-bg-hover);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .icon-btn:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--color-text-primary);
+      transition: all var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-muted);
+    }
+
+    .form-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-success);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--color-warning);
+    }
+
+    .badge-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-error);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90dvh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-text-primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-xl);
+    }
+
+    /* Login Page */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      background: var(--color-bg-primary);
+    }
+
+    .login-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--spacing-xs);
+      color: var(--color-text-primary);
+    }
+
+    .login-subtitle {
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-xl);
+      font-size: 14px;
+    }
+
+    /* Utilities */
+    .text-mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .text-muted {
+      color: var(--color-text-secondary);
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .gap-sm {
+      gap: var(--spacing-sm);
+    }
+
+    .gap-md {
+      gap: var(--spacing-md);
+    }
+
+    .mb-md {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .mb-lg {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border-strong);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #525252;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage" class="login-container">
+    <div class="login-card">
+      <h1 class="login-title">Monel Gateway</h1>
+      <p class="login-subtitle">API Gateway Management</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Auth Key</label>
+          <input type="password" class="form-input" id="authKeyInput" placeholder="Enter your auth key" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Connect
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="mainApp" class="app-container" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Monel</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="#" class="nav-item active" data-page="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-page="providers">
+            <span class="nav-icon">☁️</span>
+            <span>Providers</span>
+          </a>
+          <a href="#" class="nav-item" data-page="models">
+            <span class="nav-icon">🧠</span>
+            <span>Models</span>
+          </a>
+          <a href="#" class="nav-item" data-page="logs">
+            <span class="nav-icon">📝</span>
+            <span>Logs</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="#" class="nav-item" data-page="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </a>
+          <a href="#" class="nav-item" data-page="logout" style="color: var(--color-error);">
+            <span class="nav-icon">🚪</span>
+            <span>Logout</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page active">
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Overview of your API gateway</p>
+        </div>
+        <div class="page-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Status</div>
+              <div class="stat-value">Online</div>
+              <div class="stat-change up">
+                <span>↑</span>
+                <span>Running</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Providers</div>
+              <div class="stat-value" id="providerCount">0</div>
+              <div class="stat-change">
+                <span>Active connections</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Models</div>
+              <div class="stat-value" id="modelCount">0</div>
+              <div class="stat-change">
+                <span>Available</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Requests</div>
+              <div class="stat-value" id="totalRequests">0</div>
+              <div class="stat-change up">
+                <span>↑</span>
+                <span>Total</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Server Information</div>
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600;">Address</td>
+                  <td class="text-mono" id="dashHost">-</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Port</td>
+                  <td class="text-mono" id="dashPort">-</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Auth</td>
+                  <td><span class="badge badge-success">Protected</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top: 16px;">
+              <button class="btn btn-secondary" onclick="reloadConfig()">
+                Reload Config
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Providers Page -->
+      <div id="providersPage" class="page">
+        <div class="page-header">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="page-title">Providers</h1>
+              <p class="page-subtitle">Manage API providers</p>
+            </div>
+            <button class="btn btn-primary" onclick="showAddProviderDialog()">
+              Add Provider
+            </button>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Base URL</th>
+                  <th>API Key</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="providersTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Models Page -->
+      <div id="modelsPage" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Models</h1>
+          <p class="page-subtitle">Available AI models</p>
+        </div>
+        <div class="page-content" id="modelsContainer">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+
+      <!-- Logs Page -->
+      <div id="logsPage" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Request Logs</h1>
+          <p class="page-subtitle">Recent API requests</p>
+        </div>
+        <div class="page-content">
+          <div class="card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Provider</th>
+                  <th>Model</th>
+                  <th>Status</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="settingsPage" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Settings</h1>
+          <p class="page-subtitle">Server configuration</p>
+        </div>
+        <div class="page-content">
+          <div class="card">
+            <h2 class="card-title">Server Configuration</h2>
+            <form id="settingsForm">
+              <div class="form-group">
+                <label class="form-label">Host</label>
+                <input type="text" class="form-input" id="settingsHost" placeholder="127.0.0.1" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Port</label>
+                <input type="number" class="form-input" id="settingsPort" placeholder="7890" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Auth Key</label>
+                <input type="text" class="form-input" id="settingsAuthKey" placeholder="your-auth-key" required>
+              </div>
+              <div class="flex gap-sm">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Provider Dialog -->
+  <div id="providerDialog" class="modal-overlay">
+    <div class="modal">
+      <h2 class="modal-title" id="providerDialogTitle">Add Provider</h2>
+      <form id="providerForm">
+        <div class="form-group">
+          <label class="form-label">ID</label>
+          <input type="text" class="form-input" id="providerId" placeholder="e.g., openai" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="providerName" placeholder="e.g., OpenAI" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base URL</label>
+          <input type="url" class="form-input" id="providerBaseUrl" placeholder="https://api.openai.com/v1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input type="text" class="form-input" id="providerApiKey" placeholder="sk-..." required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeProviderDialog()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirmDialog" class="modal-overlay">
+    <div class="modal">
+      <h2 class="modal-title" id="confirmTitle">Confirm Action</h2>
+      <p id="confirmMessage" style="color: var(--color-text-secondary); margin-bottom: 24px;">Are you sure?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeConfirmDialog()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmBtn" style="background: var(--color-error);">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let authKey = '';
+    let internalToken = '';
+    let config = null;
+    let editingProviderIndex = -1;
+
+    // Check if running in Tauri
+    const isTauri = window.__TAURI__ !== undefined;
+
+    // Get internal token from Tauri
+    async function getInternalToken() {
+      if (isTauri) {
+        try {
+          internalToken = await window.__TAURI__.invoke('get_internal_token');
+          console.log('Got internal token from Tauri');
+        } catch (err) {
+          console.error('Failed to get internal token:', err);
+        }
+      }
+    }
+
+    // Initialize
+    async function init() {
+      console.log('Initializing app...');
+      console.log('isTauri:', isTauri);
+      console.log('window.__TAURI__:', window.__TAURI__);
+
+      await getInternalToken();
+
+      console.log('internalToken:', internalToken ? 'Got token (length: ' + internalToken.length + ')' : 'No token');
+
+      // If running in Tauri and have internal token, skip login
+      if (isTauri && internalToken) {
+        authKey = internalToken;
+        console.log('Auto-login with internal token');
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+        await loadDashboard();
+      } else {
+        console.log('Manual login required');
+      }
+    }
+
+    // API helpers
+    function getAuthHeader() {
+      return {
+        'Authorization': `Bearer ${authKey || internalToken}`
+      };
+    }
+
+    async function apiGet(endpoint) {
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader()
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    async function apiPost(endpoint, data) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+
+      submitBtn.textContent = 'Logging in...';
+      submitBtn.disabled = true;
+
+      authKey = document.getElementById('authKeyInput').value;
+
+      try {
+        config = await apiGet('/admin/config');
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+        await loadDashboard();
+        console.log('Login successful');
+      } catch (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        alert('Login failed: Invalid auth key');
+        console.error('Login error:', error);
+      }
+    });
+
+    // Logout
+    function logout() {
+      authKey = '';
+      config = null;
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('authKeyInput').value = '';
+    }
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = item.dataset.page;
+
+        if (page === 'logout') {
+          logout();
+          return;
+        }
+
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(page + 'Page').classList.add('active');
+
+        if (page === 'dashboard') loadDashboard();
+        if (page === 'providers') loadProviders();
+        if (page === 'models') loadModels();
+        if (page === 'logs') loadLogs();
+        if (page === 'settings') loadSettings();
+      });
+    });
+
+    // Load dashboard
+    async function loadDashboard() {
+      try {
+        config = await apiGet('/admin/config');
+        const stats = await apiGet('/admin/stats').catch(() => ({
+          total_requests: 0,
+          total_errors: 0,
+          providers: {},
+          models: {}
+        }));
+
+        document.getElementById('providerCount').textContent = config.providers.length;
+        document.getElementById('modelCount').textContent = Object.keys(stats.models || {}).length || config.providers.length * 5;
+        document.getElementById('totalRequests').textContent = stats.total_requests || 0;
+        document.getElementById('dashHost').textContent = config.server.host;
+        document.getElementById('dashPort').textContent = config.server.port;
+      } catch (error) {
+        console.error('Failed to load dashboard:', error);
+      }
+    }
+
+    // Load providers
+    async function loadProviders() {
+      try {
+        config = await apiGet('/admin/config');
+        const tbody = document.getElementById('providersTableBody');
+        tbody.innerHTML = '';
+
+        if (config.providers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-tertiary); padding: 32px;">No providers configured</td></tr>';
+          return;
+        }
+
+        config.providers.forEach((provider, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="text-mono">${escapeHtml(provider.id)}</td>
+            <td>${escapeHtml(provider.name)}</td>
+            <td class="text-muted">${escapeHtml(provider.base_url)}</td>
+            <td>
+              <span class="text-mono" id="key-${index}">••••••••••••</span>
+              <button class="icon-btn" onclick="toggleApiKey(${index}, '${escapeHtml(provider.api_key)}')">
+                <span id="eye-${index}">👁️</span>
+              </button>
+            </td>
+            <td style="text-align: right;">
+              <button class="icon-btn" onclick="editProvider(${index})" title="Edit">✏️</button>
+              <button class="icon-btn" onclick="confirmDeleteProvider(${index})" title="Delete" style="color: var(--color-error);">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Failed to load providers:', error);
+      }
+    }
+
+    function toggleApiKey(index, key) {
+      const keyEl = document.getElementById(`key-${index}`);
+      const eyeEl = document.getElementById(`eye-${index}`);
+
+      if (keyEl.textContent === '••••••••••••') {
+        keyEl.textContent = key;
+        eyeEl.textContent = '🙈';
+      } else {
+        keyEl.textContent = '••••••••••••';
+        eyeEl.textContent = '👁️';
+      }
+    }
+
+    // Provider dialogs
+    function showAddProviderDialog() {
+      editingProviderIndex = -1;
+      document.getElementById('providerDialogTitle').textContent = 'Add Provider';
+      document.getElementById('providerForm').reset();
+      document.getElementById('providerId').disabled = false;
+      document.getElementById('providerDialog').classList.add('active');
+    }
+
+    function editProvider(index) {
+      editingProviderIndex = index;
+      const provider = config.providers[index];
+
+      document.getElementById('providerDialogTitle').textContent = 'Edit Provider';
+      document.getElementById('providerId').value = provider.id;
+      document.getElementById('providerId').disabled = true;
+      document.getElementById('providerName').value = provider.name;
+      document.getElementById('providerBaseUrl').value = provider.base_url;
+      document.getElementById('providerApiKey').value = provider.api_key;
+
+      document.getElementById('providerDialog').classList.add('active');
+    }
+
+    function closeProviderDialog() {
+      document.getElementById('providerDialog').classList.remove('active');
+    }
+
+    document.getElementById('providerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const provider = {
+        id: document.getElementById('providerId').value,
+        name: document.getElementById('providerName').value,
+        base_url: document.getElementById('providerBaseUrl').value,
+        api_key: document.getElementById('providerApiKey').value
+      };
+
+      if (editingProviderIndex >= 0) {
+        config.providers[editingProviderIndex] = provider;
+      } else {
+        config.providers.push(provider);
+      }
+
+      try {
+        await apiPost('/admin/config', config);
+        closeProviderDialog();
+        loadProviders();
+      } catch (error) {
+        alert('Failed to save provider');
+        console.error(error);
+      }
+    });
+
+    function confirmDeleteProvider(index) {
+      const provider = config.providers[index];
+      document.getElementById('confirmTitle').textContent = 'Delete Provider';
+      document.getElementById('confirmMessage').textContent = `Are you sure you want to delete "${provider.name}"? This action cannot be undone.`;
+      document.getElementById('confirmBtn').onclick = () => deleteProvider(index);
+      document.getElementById('confirmDialog').classList.add('active');
+    }
+
+    async function deleteProvider(index) {
+      config.providers.splice(index, 1);
+      try {
+        await apiPost('/admin/config', config);
+        closeConfirmDialog();
+        loadProviders();
+      } catch (error) {
+        alert('Failed to delete provider');
+        console.error(error);
+      }
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmDialog').classList.remove('active');
+    }
+
+    // Load models
+    async function loadModels() {
+      try {
+        config = await apiGet('/admin/config');
+        const container = document.getElementById('modelsContainer');
+        container.innerHTML = '';
+
+        const modelsByProvider = {
+          'openai': ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+          'anthropic': ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
+          'zhipu': ['glm-4', 'glm-4v', 'glm-3-turbo']
+        };
+
+        config.providers.forEach((provider) => {
+          const models = modelsByProvider[provider.id] || ['model-1', 'model-2', 'model-3'];
+
+          const card = document.createElement('div');
+          card.className = 'card mb-md';
+          card.innerHTML = `
+            <div class="card-title">${escapeHtml(provider.name)}</div>
+            <div style="color: var(--color-text-secondary); font-size: 13px; margin-bottom: 12px;">${models.length} models available</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${models.map(model => `<span class="badge badge-success">${escapeHtml(model)}</span>`).join('')}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Failed to load models:', error);
+      }
+    }
+
+    // Load logs
+    async function loadLogs() {
+      try {
+        const logs = await apiGet('/admin/logs?limit=100').catch(() => []);
+        const tbody = document.getElementById('logsTableBody');
+        tbody.innerHTML = '';
+
+        if (logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-tertiary); padding: 32px;">No logs available</td></tr>';
+          return;
+        }
+
+        logs.forEach(log => {
+          const row = document.createElement('tr');
+          const date = new Date(log.timestamp * 1000);
+          const statusClass = log.status_code >= 200 && log.status_code < 300 ? 'badge-success' : 'badge-error';
+
+          row.innerHTML = `
+            <td class="text-mono">${date.toLocaleTimeString()}</td>
+            <td>${escapeHtml(log.provider)}</td>
+            <td class="text-muted">${escapeHtml(log.model)}</td>
+            <td><span class="badge ${statusClass}">${log.status_code}</span></td>
+            <td class="text-mono">${log.duration_ms}ms</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Failed to load logs:', error);
+      }
+    }
+
+    // Load settings
+    async function loadSettings() {
+      try {
+        config = await apiGet('/admin/config');
+        document.getElementById('settingsHost').value = config.server.host;
+        document.getElementById('settingsPort').value = config.server.port;
+        document.getElementById('settingsAuthKey').value = config.server.auth_key;
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    }
+
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      config.server.host = document.getElementById('settingsHost').value;
+      config.server.port = parseInt(document.getElementById('settingsPort').value);
+      config.server.auth_key = document.getElementById('settingsAuthKey').value;
+
+      try {
+        await apiPost('/admin/config', config);
+        alert('Settings saved successfully');
+        authKey = config.server.auth_key;
+      } catch (error) {
+        alert('Failed to save settings');
+        console.error(error);
+      }
+    });
+
+    async function reloadConfig() {
+      try {
+        await apiPost('/admin/reload', {});
+        await loadDashboard();
+        alert('Configuration reloaded');
+      } catch (error) {
+        alert('Failed to reload configuration');
+        console.error(error);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Click outside to close modals
+    document.getElementById('providerDialog').addEventListener('click', (e) => {
+      if (e.target.id === 'providerDialog') closeProviderDialog();
+    });
+
+    document.getElementById('confirmDialog').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmDialog') closeConfirmDialog();
+    });
+
+    // Initialize app
+    // Wait for Tauri API to be ready
+    if (window.__TAURI__) {
+      init();
+    } else {
+      // If not immediately available, wait a bit
+      setTimeout(() => {
+        console.log('Delayed init, __TAURI__ available:', !!window.__TAURI__);
+        init();
+      }, 100);
+    }
+  </script>
+</body>
+</html>

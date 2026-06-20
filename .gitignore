@@ -3,3 +3,9 @@
 *.yaml.tmp.*
 config.test.yaml
 nul
+server.log
+.codegraph/
+--name/
+node_modules/
+dist/
+/src-tauri/target

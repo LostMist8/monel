@@ -1,0 +1,9 @@
+server:
+  host: 127.0.0.1
+  port: 7890
+  auth_key: test
+providers:
+- id: Ikun-test
+  name: Claude-Ikun
+  base_url: https://api.ikuncode.cc/v1
+  api_key: sk-ontZwmIfTxZzPTP8gTCKTV4wkZEYJ3cK82x0W2XtmEOlEnAn

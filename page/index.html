@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monel Gateway</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 300;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 20px;
+      margin-bottom: 32px;
+      opacity: 0.9;
+    }
+
+    .links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+      border-radius: 100px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .button.primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .button.primary:hover {
+      background: #f0f0f0;
+    }
+
+    .status {
+      margin-top: 48px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .status-label {
+      opacity: 0.8;
+    }
+
+    .status-value {
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #4caf50;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Monel Gateway</h1>
+    <p>轻量级 OpenAI 兼容 API 网关</p>
+
+    <div class="links">
+      <a href="/admin.html" class="button primary">
+        管理后台
+      </a>
+      <a href="/health" class="button" target="_blank">
+        健康检查
+      </a>
+      <a href="https://github.com" class="button" target="_blank">
+        文档
+      </a>
+    </div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="status-label">服务状态</span>
+        <span class="status-value"><span class="badge">运行中</span></span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">版本</span>
+        <span class="status-value">v0.1.0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">协议</span>
+        <span class="status-value">OpenAI Compatible</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 检查服务健康状态
+    fetch('/health')
+      .then(res => res.text())
+      .then(data => {
+        console.log('Health check:', data);
+      })
+      .catch(err => {
+        console.error('Health check failed:', err);
+        document.querySelector('.badge').textContent = '离线';
+        document.querySelector('.badge').style.background = '#f44336';
+      });
+  </script>
+</body>
+</html>

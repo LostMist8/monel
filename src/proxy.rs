@@ -5,16 +5,17 @@
 //! bytes verbatim. Upstream status codes, headers, and bodies (including SSE)
 //! are forwarded unchanged; gateway-side failures yield a 502.
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use axum::body::Body;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, HeaderName, HeaderValue, Request, Response};
-use futures::stream::StreamExt;
+use serde::Serialize;
 use url::Url;
 
 use crate::error::{AppError, AppResult};
 use crate::state::AppState;
+use crate::stats;
 
 /// Headers we strip from the *request* before forwarding to the upstream.
 const REQ_HOP_BY_HOP: &[&str] = &[
@@ -50,9 +51,8 @@ pub async fn proxy(
     Path((provider_id, rest)): Path<(String, String)>,
     req: Request<Body>,
 ) -> AppResult<Response<Body>> {
-    // Resolve the provider under a short-lived read lock, then release it
-    // before any `.await` below — the guard is `!Send` and would make the
-    // whole handler future `!Send`, which axum's `Handler` trait rejects.
+    let start = Instant::now();
+
     let provider = {
         let cfg = crate::config::read(&state.config);
         cfg.find_provider(&provider_id)
@@ -64,6 +64,14 @@ pub async fn proxy(
     let (parts, body) = req.into_parts();
     let method = parts.method;
 
+    // Buffer the request body so we can extract the model name
+    let body_bytes = axum::body::to_bytes(body, 10 * 1024 * 1024) // 10MB limit
+        .await
+        .map_err(|e| AppError::internal(format!("failed to read request body: {e}")))?;
+
+    // Extract model name from request body
+    let model = extract_model_from_body(&body_bytes);
+
     // Forwarded request headers: copy + sanitize, then set the upstream auth.
     let mut fwd_headers = sanitize(&parts.headers, REQ_HOP_BY_HOP);
     fwd_headers.insert(
@@ -72,14 +80,12 @@ pub async fn proxy(
             .map_err(|e| AppError::internal(format!("invalid provider api_key: {e}")))?,
     );
 
-    let req_body = reqwest::Body::wrap_stream(body.into_data_stream());
-
     let upstream_req = state
         .http
         .request(reqwest::Method::from_bytes(method.as_str().as_bytes())
             .map_err(|e| AppError::internal(format!("invalid method: {e}")))?, upstream_url)
         .headers(fwd_headers)
-        .body(req_body)
+        .body(body_bytes.clone())
         .timeout(Duration::from_secs(600))
         .build()
         .map_err(|e| AppError::bad_gateway(format!("failed to build upstream request: {e}")))?;
@@ -87,24 +93,94 @@ pub async fn proxy(
     let upstream_resp = state
         .http
         .execute(upstream_req)
-        .await
-        .map_err(|e| AppError::bad_gateway(format!("upstream connect failed: {e}")))?;
+        .await;
 
-    let status = upstream_resp.status();
-    let resp_headers = sanitize(upstream_resp.headers(), RESP_HOP_BY_HOP);
+    let duration_ms = start.elapsed().as_millis() as u64;
 
-    let byte_stream = upstream_resp.bytes_stream().map(|res| {
-        res.map_err(|e| {
-            // axum BoxError is a generic error type; lossy-convert to std::io::Error.
-            std::io::Error::new(std::io::ErrorKind::Other, e.to_string())
-        })
-    });
+    match upstream_resp {
+        Ok(resp) => {
+            let status = resp.status();
+            let resp_headers = sanitize(resp.headers(), RESP_HOP_BY_HOP);
 
-    let mut out = Response::new(Body::from_stream(byte_stream));
-    *out.status_mut() = status;
-    *out.headers_mut() = resp_headers;
+            // Buffer the response to extract token usage
+            let resp_bytes = resp.bytes().await
+                .map_err(|e| AppError::bad_gateway(format!("failed to read upstream response: {e}")))?;
 
-    Ok(out)
+            // Extract token usage from response
+            let usage = extract_usage_from_response(&resp_bytes);
+
+            let error_msg = if !status.is_success() {
+                Some(format!("HTTP {}", status.as_u16()))
+            } else {
+                None
+            };
+
+            stats::record_request(
+                state.stats.clone(),
+                provider_id.clone(),
+                model,
+                status.as_u16(),
+                duration_ms,
+                error_msg,
+                usage,
+            ).await;
+
+            let mut out = Response::new(Body::from(resp_bytes));
+            *out.status_mut() = status;
+            *out.headers_mut() = resp_headers;
+
+            Ok(out)
+        }
+        Err(e) => {
+            stats::record_request(
+                state.stats.clone(),
+                provider_id.clone(),
+                model,
+                502,
+                duration_ms,
+                Some(e.to_string()),
+                None,
+            ).await;
+
+            Err(AppError::bad_gateway(format!("upstream connect failed: {e}")))
+        }
+    }
+}
+
+/// Extract model name from JSON request body.
+fn extract_model_from_body(body: &[u8]) -> String {
+    if let Ok(json) = serde_json::from_slice::<serde_json::Value>(body) {
+        if let Some(model) = json.get("model").and_then(|v| v.as_str()) {
+            return model.to_string();
+        }
+    }
+    "unknown".to_string()
+}
+
+/// Token usage info extracted from response.
+#[derive(Debug, Clone, Serialize)]
+pub struct TokenUsage {
+    pub input_tokens: u64,
+    pub output_tokens: u64,
+    pub cache_read_input_tokens: u64,
+}
+
+/// Extract token usage from JSON response body.
+fn extract_usage_from_response(body: &[u8]) -> Option<TokenUsage> {
+    let json: serde_json::Value = serde_json::from_slice(body).ok()?;
+    let usage = json.get("usage")?;
+
+    // OpenAI format: prompt_tokens, completion_tokens
+    // Anthropic format: input_tokens, output_tokens
+    let input = usage.get("input_tokens").or_else(|| usage.get("prompt_tokens"))
+        .and_then(|v| v.as_u64()).unwrap_or(0);
+    let output = usage.get("output_tokens").or_else(|| usage.get("completion_tokens"))
+        .and_then(|v| v.as_u64()).unwrap_or(0);
+    let cache = usage.get("cache_read_input_tokens")
+        .or_else(|| usage.get("prompt_tokens_details").and_then(|d| d.get("cached_tokens")))
+        .and_then(|v| v.as_u64()).unwrap_or(0);
+
+    Some(TokenUsage { input_tokens: input, output_tokens: output, cache_read_input_tokens: cache })
 }
 
 /// Build the final upstream URL.

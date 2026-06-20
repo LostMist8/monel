@@ -1,24 +1,17 @@
-# Sample configuration for the gateway.
-# Edit values, then either restart the server OR let the file-watcher
-# hot-reload it (no restart needed). The admin API can also update it.
-
 server:
-  host: "127.0.0.1"
+  host: 127.0.0.1
   port: 7890
-  auth_key: "your-global-secret"
-
+  auth_key: your-global-secret
 providers:
-  - id: "rc"
-    name: "RC (right.codes AWS)"
-    base_url: "https://right.codes/claude-aws/v1"
-    api_key: "sk-xxxxx"
-
-  - id: "zhipu"
-    name: "智谱GLM"
-    base_url: "https://open.bigmodel.cn/api/paas/v4"
-    api_key: "zhipu-key"
-
-  - id: "ikun"
-    name: "Ikun"
-    base_url: "https://api.ikuncode.cc/v1"
-    api_key: "ikun-key"
+- id: rc
+  name: RC (right.codes AWS)
+  base_url: https://right.codes/claude-aws/v1
+  api_key: sk-xxxxx
+- id: zhipu
+  name: 智谱GLM
+  base_url: https://open.bigmodel.cn/api/paas/v4
+  api_key: zhipu-key
+- id: ikun
+  name: Ikun
+  base_url: https://api.ikuncode.cc/v1
+  api_key: sk-ontZwmIfTxZzPTP8gTCKTV4wkZEYJ3cK82x0W2XtmEOlEnAn

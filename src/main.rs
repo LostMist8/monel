@@ -12,6 +12,7 @@ use anyhow::{Context, Result};
 use axum::{middleware, Router};
 use notify::{event::EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 
 mod admin;
@@ -21,9 +22,13 @@ mod config;
 mod error;
 mod proxy;
 mod state;
+mod stats;
 
 use config::{Config, SharedConfig};
 use state::AppState;
+use stats::Stats;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -92,7 +97,13 @@ async fn run_server(args: std::iter::Skip<std::env::Args>) -> Result<()> {
         .build()
         .context("failed to build reqwest client")?;
 
-    let state = AppState::new(shared.clone(), http, config_path.clone());
+    // Generate internal token for Tauri (or use empty for CLI mode)
+    let internal_token = Arc::new(String::new()); // CLI mode doesn't need internal token
+
+    // Create stats tracker
+    let stats = Arc::new(RwLock::new(Stats::new()));
+
+    let state = AppState::new(shared.clone(), http, config_path.clone(), internal_token, stats);
 
     // Hot reload watcher.
     spawn_config_watcher(shared.clone(), config_path.clone());
@@ -128,15 +139,20 @@ fn build_router(state: AppState) -> Router {
         .route("/providers", axum::routing::get(aggregator::list_providers))
         .route("/admin/config", axum::routing::get(admin::get_config).post(admin::post_config))
         .route("/admin/reload", axum::routing::post(admin::reload))
+        .route("/admin/stats", axum::routing::get(stats::get_stats))
+        .route("/admin/logs", axum::routing::get(stats::get_logs))
         .layer(middleware::from_fn_with_state(state.clone(), auth::require_auth));
 
     Router::<AppState>::new()
         // Health is public (no auth).
         .route("/health", axum::routing::get(|| async { "ok" }))
+        // API routes come first
         .merge(protected)
+        .with_state(state)
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
-        .with_state(state)
+        // Static files last as fallback - only serves if no API route matched
+        .fallback_service(ServeDir::new("ui").fallback(ServeDir::new("page")))
 }
 
 /// Spawn a background task that hot-reloads `config.yaml` on change.
