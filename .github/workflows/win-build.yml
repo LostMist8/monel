@@ -26,15 +26,8 @@ jobs:
         with:
           workspaces: src-tauri
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend dependencies
-        run: |
-          # Tauri 2.0 不需要前端构建步骤，直接用 ui/ 里的静态文件
-          echo "Using static frontend from ui/"
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0" --locked
 
       - name: Build Tauri App
         run: |
