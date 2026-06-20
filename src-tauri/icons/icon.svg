@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    Monel Gateway — app icon master
+    A rounded-square gradient tile with a clean "M" monogram.
+    Rasterized copies: 32, 128, 128@2x, 256, 512, icon.ico, icon.icns
+    Drawn programmatically in Python (Pillow) from this spec.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b7cfa"/>
+      <stop offset="1" stop-color="#7c5cfa"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#e8ecff" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded tile background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#bg)"/>
+
+  <!-- Inner top highlight (subtle glass edge) -->
+  <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224"
+        fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="6"/>
+
+  <!-- Monel "M" — geometric, even stroke weight -->
+  <g stroke="url(#stroke)" stroke-width="96" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Left vertical -->
+    <line x1="312" y1="340" x2="312" y2="700"/>
+    <!-- Right vertical -->
+    <line x1="712" y1="340" x2="712" y2="700"/>
+    <!-- Left diagonal of the V (down to the valley) -->
+    <line x1="312" y1="340" x2="512" y2="560"/>
+    <!-- Right diagonal of the V (back up) -->
+    <line x1="512" y1="560" x2="712" y2="340"/>
+  </g>
+</svg>

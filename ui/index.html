@@ -7,626 +7,88 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Monel Gateway</title>
+
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Material Symbols Rounded (variable icon font) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Shared design system -->
+  <link rel="stylesheet" href="app.css">
+
   <style>
-    :root {
-      /* Refined palette - neutral base with single accent */
-      --color-bg-primary: #0a0a0a;
-      --color-bg-secondary: #111111;
-      --color-bg-elevated: #1a1a1a;
-      --color-bg-hover: #222222;
-
-      --color-text-primary: #e5e5e5;
-      --color-text-secondary: #a3a3a3;
-      --color-text-tertiary: #737373;
-
-      --color-accent: #3b82f6;
-      --color-accent-hover: #2563eb;
-      --color-accent-muted: rgba(59, 130, 246, 0.1);
-
-      --color-success: #10b981;
-      --color-warning: #f59e0b;
-      --color-error: #ef4444;
-
-      --color-border: #262626;
-      --color-border-strong: #404040;
-
-      /* Typography */
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-
-      /* Spacing */
-      --spacing-xs: 4px;
-      --spacing-sm: 8px;
-      --spacing-md: 16px;
-      --spacing-lg: 24px;
-      --spacing-xl: 32px;
-
-      /* Radius */
-      --radius-sm: 6px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
-
-      /* Shadows - tinted to match dark background */
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.4);
-
-      /* Transitions */
-      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: var(--font-sans);
-      background: var(--color-bg-primary);
-      color: var(--color-text-primary);
-      line-height: 1.6;
-      font-size: 14px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* App Shell */
-    .app-container {
-      display: flex;
-      min-height: 100dvh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 240px;
-      background: var(--color-bg-secondary);
-      border-right: 1px solid var(--color-border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-
-    .sidebar-header {
-      padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .sidebar-title {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--color-text-primary);
+    /* Page-specific tweaks only (everything else lives in app.css) */
+    .model-row {
       display: flex;
       align-items: center;
-      gap: var(--spacing-sm);
-    }
-
-    .sidebar-title::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 8px var(--color-accent);
-    }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: var(--spacing-md) 0;
-      overflow-y: auto;
-    }
-
-    .nav-section {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .nav-section-title {
-      padding: 0 var(--spacing-md);
-      margin-bottom: var(--spacing-sm);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-text-tertiary);
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-sm) var(--spacing-md);
-      margin: 0 var(--spacing-sm);
+      gap: var(--sp-sm);
       cursor: pointer;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      border-radius: var(--radius-sm);
-      transition: all var(--transition-fast);
+      padding: var(--sp-sm) var(--sp-sm);
+      border-radius: var(--r-sm);
+      transition: background var(--t-fast);
+    }
+    .model-row:hover { background: var(--bg-hover); }
+    .model-row .model-name {
+      font-family: var(--font-mono);
       font-size: 13px;
-      font-weight: 500;
     }
-
-    .nav-item:hover {
-      background: var(--color-bg-hover);
-      color: var(--color-text-primary);
+    .model-row .model-result {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
     }
-
-    .nav-item.active {
-      background: var(--color-accent-muted);
-      color: var(--color-accent);
-    }
-
-    .nav-item:active {
-      transform: scale(0.98);
-    }
-
-    .nav-icon {
-      width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    /* Main Content */
-    .main-content {
+    .model-row input[type="checkbox"] { width: 16px; height: 16px; }
+    .api-key-cell { display: flex; align-items: center; gap: var(--sp-xs); }
+    .api-key-cell .key-text {
       flex: 1;
-      display: flex;
-      flex-direction: column;
       min-width: 0;
     }
-
-    .page {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .page.active {
-      display: flex;
-    }
-
-    .page-header {
-      padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .page-title {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: var(--spacing-xs);
-      color: var(--color-text-primary);
-    }
-
-    .page-subtitle {
-      font-size: 14px;
-      color: var(--color-text-secondary);
-    }
-
-    .page-content {
-      flex: 1;
-      padding: var(--spacing-xl);
-      overflow-y: auto;
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .stat-card {
-      background: var(--color-bg-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-lg);
-      transition: all var(--transition-base);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, var(--color-accent), transparent);
-    }
-
-    .stat-card:hover {
-      border-color: var(--color-border-strong);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-text-tertiary);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      letter-spacing: -0.02em;
-      color: var(--color-text-primary);
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-
-    .stat-change {
-      margin-top: var(--spacing-sm);
-      font-size: 12px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-
-    .stat-change.up {
-      color: var(--color-success);
-    }
-
-    .stat-change.down {
-      color: var(--color-error);
-    }
-
-    /* Card */
-    .card {
-      background: var(--color-bg-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-lg);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: var(--spacing-md);
-      color: var(--color-text-primary);
-    }
-
-    /* Table */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      table-layout: fixed;
-    }
-
-    .data-table th {
-      text-align: left;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-text-tertiary);
-      padding: var(--spacing-md) var(--spacing-sm);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .data-table td {
-      padding: var(--spacing-md) var(--spacing-sm);
-      border-bottom: 1px solid var(--color-border);
-      color: var(--color-text-secondary);
-    }
-
-    .data-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .data-table tr:hover td {
-      background: var(--color-bg-hover);
-      color: var(--color-text-primary);
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all var(--transition-fast);
+    .actions-cell {
+      text-align: right;
       white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: var(--color-accent);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--color-accent-hover);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      background: var(--color-bg-elevated);
-      color: var(--color-text-primary);
-      border: 1px solid var(--color-border);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--color-border-strong);
-      background: var(--color-bg-hover);
-    }
-
-    .btn-secondary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--color-text-secondary);
-    }
-
-    .btn-ghost:hover {
-      background: var(--color-bg-hover);
-      color: var(--color-text-primary);
-    }
-
-    .icon-btn {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      border-radius: var(--radius-sm);
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .icon-btn:hover {
-      background: var(--color-bg-hover);
-      color: var(--color-text-primary);
-    }
-
-    .icon-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* Forms */
-    .form-group {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: var(--spacing-md);
-      background: var(--color-bg-secondary);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      color: var(--color-text-primary);
-      transition: all var(--transition-fast);
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px var(--color-accent-muted);
-    }
-
-    .form-input::placeholder {
-      color: var(--color-text-tertiary);
-    }
-
-    /* Badge */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px var(--spacing-sm);
-      border-radius: var(--radius-sm);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .badge-success {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--color-success);
-    }
-
-    .badge-warning {
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--color-warning);
-    }
-
-    .badge-error {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--color-error);
-    }
-
-    /* Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: var(--color-bg-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-xl);
-      max-width: 500px;
-      width: 90%;
-      max-height: 90dvh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: var(--spacing-lg);
-      color: var(--color-text-primary);
-    }
-
-    .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-xl);
+      gap: var(--sp-xs);
     }
-
-    /* Login Page */
-    .login-container {
+    .provider-card-head {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100dvh;
-      background: var(--color-bg-primary);
-    }
-
-    .login-card {
-      background: var(--color-bg-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-xl);
-      width: 90%;
-      max-width: 400px;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .login-title {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: var(--spacing-xs);
-      color: var(--color-text-primary);
-    }
-
-    .login-subtitle {
-      color: var(--color-text-secondary);
-      margin-bottom: var(--spacing-xl);
-      font-size: 14px;
-    }
-
-    /* Utilities */
-    .text-mono {
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .text-muted {
-      color: var(--color-text-secondary);
-    }
-
-    .flex {
-      display: flex;
-    }
-
-    .flex-col {
-      flex-direction: column;
-    }
-
-    .items-center {
-      align-items: center;
-    }
-
-    .justify-between {
       justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--sp-xs);
     }
-
-    .gap-sm {
-      gap: var(--spacing-sm);
+    .provider-card-meta {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: var(--sp-md);
     }
-
-    .gap-md {
-      gap: var(--spacing-md);
-    }
-
-    .mb-md {
-      margin-bottom: var(--spacing-md);
-    }
-
-    .mb-lg {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--color-border-strong);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #525252;
-    }
+    .dashboard-loading .stat-value,
+    .dashboard-loading .data-table td { color: transparent; }
   </style>
 </head>
 <body>
+  <a href="#mainApp" class="sr-only">Skip to content</a>
+
   <!-- Login Page -->
   <div id="loginPage" class="login-container">
     <div class="login-card">
-      <h1 class="login-title">Monel Gateway</h1>
-      <p class="login-subtitle">API Gateway Management</p>
+      <div class="login-brand">
+        <div class="brand-mark" aria-hidden="true">M</div>
+        <div>
+          <div class="login-title">Monel Gateway</div>
+          <div class="text-faint" style="font-size: 12px;">API Gateway Management</div>
+        </div>
+      </div>
       <form id="loginForm">
         <div class="form-group">
-          <label class="form-label">Auth Key</label>
-          <input type="password" class="form-input" id="authKeyInput" placeholder="Enter your auth key" required>
+          <label class="form-label" for="authKeyInput">Auth Key</label>
+          <input type="password" class="form-input" id="authKeyInput" placeholder="Enter your auth key" autocomplete="current-password" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          Connect
+        <button type="submit" class="btn btn-primary" id="loginSubmit" style="width: 100%;">
+          <span class="ms">login</span>
+          <span>Connect</span>
         </button>
       </form>
     </div>
@@ -637,36 +99,39 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-title">Monel</div>
+        <div class="sidebar-title">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <span>Monel</span>
+        </div>
       </div>
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" aria-label="Primary">
         <div class="nav-section">
           <div class="nav-section-title">Main</div>
-          <a href="#" class="nav-item active" data-page="dashboard">
-            <span class="nav-icon">📊</span>
+          <a href="#dashboard" class="nav-item active" data-page="dashboard">
+            <span class="ms" aria-hidden="true">dashboard</span>
             <span>Dashboard</span>
           </a>
-          <a href="#" class="nav-item" data-page="providers">
-            <span class="nav-icon">☁️</span>
+          <a href="#providers" class="nav-item" data-page="providers">
+            <span class="ms" aria-hidden="true">cloud</span>
             <span>Providers</span>
           </a>
-          <a href="#" class="nav-item" data-page="models">
-            <span class="nav-icon">🧠</span>
+          <a href="#models" class="nav-item" data-page="models">
+            <span class="ms" aria-hidden="true">neurology</span>
             <span>Models</span>
           </a>
-          <a href="#" class="nav-item" data-page="logs">
-            <span class="nav-icon">📝</span>
+          <a href="#logs" class="nav-item" data-page="logs">
+            <span class="ms" aria-hidden="true">receipt_long</span>
             <span>Logs</span>
           </a>
         </div>
         <div class="nav-section">
           <div class="nav-section-title">System</div>
-          <a href="#" class="nav-item" data-page="settings">
-            <span class="nav-icon">⚙️</span>
+          <a href="#settings" class="nav-item" data-page="settings">
+            <span class="ms" aria-hidden="true">settings</span>
             <span>Settings</span>
           </a>
-          <a href="#" class="nav-item" data-page="logout" id="logoutBtn" style="color: var(--color-error);">
-            <span class="nav-icon">🚪</span>
+          <a href="#logout" class="nav-item" data-page="logout" id="logoutBtn" style="color: var(--error);">
+            <span class="ms" aria-hidden="true">logout</span>
             <span>Logout</span>
           </a>
         </div>
@@ -674,7 +139,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="mainApp">
       <!-- Dashboard Page -->
       <div id="dashboardPage" class="page active">
         <div class="page-header">
@@ -682,34 +147,42 @@
           <p class="page-subtitle">Overview of your API gateway</p>
         </div>
         <div class="page-content">
-          <div class="stats-grid">
+          <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
               <div class="stat-label">Status</div>
-              <div class="stat-value">Online</div>
+              <div class="stat-value" id="serverStatusValue">
+                <span class="skeleton skeleton-block"></span>
+              </div>
               <div class="stat-change up">
-                <span>↑</span>
-                <span>Running</span>
+                <span class="ms ms-sm">trending_up</span>
+                <span id="serverStatusDetail">Loading</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Providers</div>
-              <div class="stat-value" id="providerCount">0</div>
+              <div class="stat-value" id="providerCount">
+                <span class="skeleton skeleton-block"></span>
+              </div>
               <div class="stat-change">
                 <span>Active connections</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Models</div>
-              <div class="stat-value" id="modelCount">0</div>
+              <div class="stat-value" id="modelCount">
+                <span class="skeleton skeleton-block"></span>
+              </div>
               <div class="stat-change">
                 <span>Available</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Requests</div>
-              <div class="stat-value" id="totalRequests">0</div>
+              <div class="stat-value" id="totalRequests">
+                <span class="skeleton skeleton-block"></span>
+              </div>
               <div class="stat-change up">
-                <span>↑</span>
+                <span class="ms ms-sm">trending_up</span>
                 <span>Total</span>
               </div>
             </div>
@@ -720,7 +193,7 @@
             <table class="data-table">
               <tbody>
                 <tr>
-                  <td style="font-weight: 600;">Address</td>
+                  <td style="font-weight: 600; width: 30%;">Address</td>
                   <td class="text-mono" id="dashHost">-</td>
                 </tr>
                 <tr>
@@ -729,13 +202,16 @@
                 </tr>
                 <tr>
                   <td style="font-weight: 600;">Auth</td>
-                  <td><span class="badge badge-success">Protected</span></td>
+                  <td><span class="badge badge-success">
+                    <span class="ms ms-sm">shield</span>Protected
+                  </span></td>
                 </tr>
               </tbody>
             </table>
-            <div style="margin-top: 16px;">
+            <div class="mt-md">
               <button class="btn btn-secondary" onclick="reloadConfig()">
-                Reload Config
+                <span class="ms">refresh</span>
+                <span>Reload Config</span>
               </button>
             </div>
           </div>
@@ -745,13 +221,14 @@
       <!-- Providers Page -->
       <div id="providersPage" class="page">
         <div class="page-header">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-md">
             <div>
               <h1 class="page-title">Providers</h1>
               <p class="page-subtitle">Manage API providers</p>
             </div>
             <button class="btn btn-primary" onclick="showAddProviderDialog()">
-              Add Provider
+              <span class="ms">add</span>
+              <span>Add Provider</span>
             </button>
           </div>
         </div>
@@ -778,13 +255,16 @@
       <!-- Models Page -->
       <div id="modelsPage" class="page">
         <div class="page-header">
-          <div>
-            <h1 class="page-title">Models</h1>
-            <p class="page-subtitle">Available AI models</p>
+          <div class="flex items-center justify-between gap-md">
+            <div>
+              <h1 class="page-title">Models</h1>
+              <p class="page-subtitle">Available AI models</p>
+            </div>
+            <button class="btn btn-primary" onclick="testSelectedModels()" id="testModelsBtn">
+              <span class="ms">play_arrow</span>
+              <span>Test Selected Models</span>
+            </button>
           </div>
-          <button class="btn btn-primary" onclick="testSelectedModels()" id="testModelsBtn">
-            Test Selected Models
-          </button>
         </div>
         <div class="page-content" id="modelsContainer">
           <!-- Dynamic content -->
@@ -827,24 +307,30 @@
           <p class="page-subtitle">Server configuration</p>
         </div>
         <div class="page-content">
-          <div class="card">
+          <div class="card" style="max-width: 560px;">
             <h2 class="card-title">Server Configuration</h2>
             <form id="settingsForm">
               <div class="form-group">
-                <label class="form-label">Host</label>
+                <label class="form-label" for="settingsHost">Host</label>
                 <input type="text" class="form-input" id="settingsHost" placeholder="127.0.0.1" required>
               </div>
               <div class="form-group">
-                <label class="form-label">Port</label>
+                <label class="form-label" for="settingsPort">Port</label>
                 <input type="number" class="form-input" id="settingsPort" placeholder="7890" required>
               </div>
               <div class="form-group">
-                <label class="form-label">Auth Key</label>
+                <label class="form-label" for="settingsAuthKey">Auth Key</label>
                 <input type="text" class="form-input" id="settingsAuthKey" placeholder="your-auth-key" required>
               </div>
               <div class="flex gap-sm">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <button type="button" class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+                <button type="submit" class="btn btn-primary">
+                  <span class="ms">save</span>
+                  <span>Save Changes</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                  <span class="ms">restart_alt</span>
+                  <span>Reset</span>
+                </button>
               </div>
             </form>
           </div>
@@ -854,47 +340,61 @@
   </div>
 
   <!-- Provider Dialog -->
-  <div id="providerDialog" class="modal-overlay">
+  <div id="providerDialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="providerDialogTitle">
     <div class="modal">
       <h2 class="modal-title" id="providerDialogTitle">Add Provider</h2>
       <form id="providerForm">
         <div class="form-group">
-          <label class="form-label">ID</label>
+          <label class="form-label" for="providerId">ID</label>
           <input type="text" class="form-input" id="providerId" placeholder="e.g., openai" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Name</label>
+          <label class="form-label" for="providerName">Name</label>
           <input type="text" class="form-input" id="providerName" placeholder="e.g., OpenAI" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Base URL</label>
+          <label class="form-label" for="providerBaseUrl">Base URL</label>
           <input type="url" class="form-input" id="providerBaseUrl" placeholder="https://api.openai.com/v1" required>
         </div>
         <div class="form-group">
-          <label class="form-label">API Key</label>
+          <label class="form-label" for="providerApiKey">API Key</label>
           <input type="text" class="form-input" id="providerApiKey" placeholder="sk-..." required>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" onclick="closeProviderDialog()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="ms">save</span>
+            <span>Save</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Confirm Dialog -->
-  <div id="confirmDialog" class="modal-overlay">
-    <div class="modal">
-      <h2 class="modal-title" id="confirmTitle">Confirm Action</h2>
-      <p id="confirmMessage" style="color: var(--color-text-secondary); margin-bottom: 24px;">Are you sure?</p>
+  <div id="confirmDialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal" style="max-width: 420px;">
+      <div class="flex items-center gap-sm" style="margin-bottom: var(--sp-md);">
+        <span class="ms ms-lg" style="color: var(--warning);">warning</span>
+        <h2 class="modal-title" id="confirmTitle" style="margin-bottom: 0;">Confirm Action</h2>
+      </div>
+      <p class="modal-body" id="confirmMessage">Are you sure?</p>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" onclick="closeConfirmDialog()">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmBtn" style="background: var(--color-error);">Confirm</button>
+        <button type="button" class="btn btn-danger" id="confirmBtn">Confirm</button>
       </div>
     </div>
   </div>
 
+  <!-- Toast stack is injected by app.js -->
+
+  <script src="app.js"></script>
   <script>
+    // ===================================================================
+    // Monel Gateway — Tauri frontend logic
+    // Functional behavior preserved; UI layer upgraded to design system.
+    // ===================================================================
+
     // Global state
     let authKey = '';
     let internalToken = '';
@@ -928,7 +428,6 @@
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) logoutBtn.style.display = 'none';
       }
-
 
       console.log('internalToken:', internalToken ? 'Got token (length: ' + internalToken.length + ')' : 'No token');
 
@@ -977,10 +476,11 @@
     // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const submitBtn = e.target.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
+      const submitBtn = document.getElementById('loginSubmit');
+      const btnLabel = submitBtn.querySelector('span:last-child');
+      const originalText = btnLabel.textContent;
 
-      submitBtn.textContent = 'Logging in...';
+      btnLabel.textContent = 'Connecting';
       submitBtn.disabled = true;
 
       authKey = document.getElementById('authKeyInput').value;
@@ -990,11 +490,12 @@
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'flex';
         await loadDashboard();
+        showToast('Connected to gateway', 'success');
         console.log('Login successful');
       } catch (error) {
         submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-        alert('Login failed: Invalid auth key');
+        btnLabel.textContent = originalText;
+        showToast('Login failed. Invalid auth key.', 'error');
         console.error('Login error:', error);
       }
     });
@@ -1044,6 +545,8 @@
           models: {}
         }));
 
+        document.getElementById('serverStatusValue').textContent = 'Online';
+        document.getElementById('serverStatusDetail').textContent = 'Running';
         document.getElementById('providerCount').textContent = config.providers.length;
         document.getElementById('modelCount').textContent = Object.keys(stats.models || {}).length || config.providers.length * 5;
         document.getElementById('totalRequests').textContent = stats.total_requests || 0;
@@ -1051,18 +554,41 @@
         document.getElementById('dashPort').textContent = config.server.port;
       } catch (error) {
         console.error('Failed to load dashboard:', error);
+        document.getElementById('serverStatusValue').textContent = 'Offline';
+        document.getElementById('serverStatusDetail').textContent = 'Unreachable';
+        document.getElementById('serverStatusValue').parentElement.querySelector('.stat-change').classList.remove('up');
+        document.getElementById('serverStatusValue').parentElement.querySelector('.stat-change').classList.add('down');
+        showToast('Failed to load dashboard data', 'error');
       }
     }
 
     // Load providers
     async function loadProviders() {
+      const tbody = document.getElementById('providersTableBody');
+      // Loading skeleton
+      tbody.innerHTML = Array.from({ length: 3 }).map(() => `
+        <tr>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td></td>
+        </tr>
+      `).join('');
+
       try {
         config = await apiGet('/admin/config');
-        const tbody = document.getElementById('providersTableBody');
         tbody.innerHTML = '';
 
         if (config.providers.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--color-text-tertiary); padding: 32px;">No providers configured</td></tr>';
+          tbody.innerHTML = `
+            <tr><td colspan="5">
+              <div class="empty-state">
+                <div><span class="ms">cloud_off</span></div>
+                <div class="empty-state-title">No providers configured</div>
+                <div class="empty-state-hint">Click "Add Provider" to connect your first API.</div>
+              </div>
+            </td></tr>`;
           return;
         }
 
@@ -1071,24 +597,35 @@
           row.innerHTML = `
             <td class="text-mono">${escapeHtml(provider.id)}</td>
             <td>${escapeHtml(provider.name)}</td>
-            <td class="text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(provider.base_url)}</td>
+            <td class="text-muted truncate" style="max-width: 200px;" title="${escapeHtml(provider.base_url)}">${escapeHtml(provider.base_url)}</td>
             <td style="max-width: 160px;">
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <span class="text-mono" id="key-${index}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; display: inline-block;">••••••••</span>
-                <button class="icon-btn" onclick="toggleApiKey(${index}, '${escapeHtml(provider.api_key)}')" style="flex-shrink: 0;">
-                  <span id="eye-${index}">👁️</span>
+              <div class="api-key-cell">
+                <span class="text-mono key-text truncate" id="key-${index}">••••••••</span>
+                <button class="icon-btn" onclick="toggleApiKey(${index}, '${escapeHtml(provider.api_key)}')" title="Toggle key visibility" aria-label="Toggle key visibility">
+                  <span class="ms" id="eye-${index}">visibility</span>
                 </button>
               </div>
             </td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="icon-btn" onclick="editProvider(${index})" title="Edit">✏️</button>
-              <button class="icon-btn" onclick="confirmDeleteProvider(${index})" title="Delete" style="color: var(--color-error);">🗑️</button>
+            <td class="actions-cell">
+              <button class="icon-btn" onclick="editProvider(${index})" title="Edit" aria-label="Edit provider">
+                <span class="ms">edit</span>
+              </button>
+              <button class="icon-btn danger" onclick="confirmDeleteProvider(${index})" title="Delete" aria-label="Delete provider">
+                <span class="ms">delete</span>
+              </button>
             </td>
           `;
           tbody.appendChild(row);
         });
       } catch (error) {
         console.error('Failed to load providers:', error);
+        tbody.innerHTML = `<tr><td colspan="5">
+          <div class="empty-state">
+            <div><span class="ms" style="color: var(--error);">cloud_off</span></div>
+            <div class="empty-state-title">Failed to load providers</div>
+            <div class="empty-state-hint">Check the server connection and try again.</div>
+          </div>
+        </td></tr>`;
       }
     }
 
@@ -1096,12 +633,14 @@
       const keyEl = document.getElementById(`key-${index}`);
       const eyeEl = document.getElementById(`eye-${index}`);
 
-      if (keyEl.textContent === '••••••••••••') {
-        keyEl.textContent = key;
-        eyeEl.textContent = '🙈';
+      if (keyEl.dataset.revealed === '1') {
+        keyEl.textContent = '••••••••';
+        keyEl.dataset.revealed = '0';
+        eyeEl.textContent = 'visibility';
       } else {
-        keyEl.textContent = '••••••••••••';
-        eyeEl.textContent = '👁️';
+        keyEl.textContent = key;
+        keyEl.dataset.revealed = '1';
+        eyeEl.textContent = 'visibility_off';
       }
     }
 
@@ -1152,8 +691,9 @@
         await apiPost('/admin/config', config);
         closeProviderDialog();
         loadProviders();
+        showToast(editingProviderIndex >= 0 ? 'Provider updated' : 'Provider added', 'success');
       } catch (error) {
-        alert('Failed to save provider');
+        showToast('Failed to save provider', 'error');
         console.error(error);
       }
     });
@@ -1172,8 +712,9 @@
         await apiPost('/admin/config', config);
         closeConfirmDialog();
         loadProviders();
+        showToast('Provider deleted', 'success');
       } catch (error) {
-        alert('Failed to delete provider');
+        showToast('Failed to delete provider', 'error');
         console.error(error);
       }
     }
@@ -1184,9 +725,19 @@
 
     // Load models
     async function loadModels() {
+      const container = document.getElementById('modelsContainer');
+      // Loading skeleton
+      container.innerHTML = Array.from({ length: 2 }).map(() => `
+        <div class="card mb-md">
+          <span class="skeleton skeleton-line" style="height: 18px; width: 40%;"></span>
+          <div style="margin-top: 12px;">
+            ${Array.from({ length: 3 }).map(() => `<div style="padding: 8px;"><span class="skeleton skeleton-line short"></span></div>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
       try {
         const models = await apiGet('/models');
-        const container = document.getElementById('modelsContainer');
         container.innerHTML = '';
 
         // Group models by provider
@@ -1199,7 +750,14 @@
         });
 
         if (Object.keys(grouped).length === 0) {
-          container.innerHTML = '<div class="card" style="text-align: center; padding: 48px; color: var(--color-text-tertiary);">No models found. Check provider connections.</div>';
+          container.innerHTML = `
+            <div class="card">
+              <div class="empty-state">
+                <div><span class="ms">neurology</span></div>
+                <div class="empty-state-title">No models found</div>
+                <div class="empty-state-hint">Check your provider connections and try refreshing.</div>
+              </div>
+            </div>`;
           return;
         }
 
@@ -1207,17 +765,23 @@
           const card = document.createElement('div');
           card.className = 'card mb-md';
           card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <div class="card-title" style="margin-bottom: 0;">${escapeHtml(data.name)}</div>
-              <button class="icon-btn" onclick="loadModels()" title="Refresh models" style="font-size: 14px;">🔄</button>
+            <div class="provider-card-head">
+              <div class="card-title" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                <span class="ms" style="color: var(--accent);">cloud</span>
+                ${escapeHtml(data.name)}
+              </div>
+              <button class="icon-btn" onclick="loadModels()" title="Refresh models" aria-label="Refresh models">
+                <span class="ms">refresh</span>
+              </button>
             </div>
-            <div style="color: var(--color-text-secondary); font-size: 13px; margin-bottom: 12px;">${data.models.length} models available</div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div class="provider-card-meta">${data.models.length} models available</div>
+            <div class="flex flex-col gap-xs">
               ${data.models.map(model => `
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background var(--transition-fast);" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='transparent'">
-                  <input type="checkbox" class="model-checkbox" data-provider="${escapeHtml(providerId)}" data-model="${escapeHtml(model)}" style="width: 16px; height: 16px; cursor: pointer;">
-                  <span style="font-family: var(--font-mono); font-size: 13px;">${escapeHtml(model)}</span>
-                  <span id="test-result-${escapeHtml(providerId)}-${escapeHtml(model).replace(/[^a-zA-Z0-9-_]/g, '_')}" style="margin-left: auto; font-size: 12px; color: var(--color-text-tertiary);"></span>
+                <label class="model-row">
+                  <input type="checkbox" class="model-checkbox" data-provider="${escapeHtml(providerId)}" data-model="${escapeHtml(model)}">
+                  <span class="ms ms-sm" style="color: var(--text-tertiary);">smart_toy</span>
+                  <span class="model-name">${escapeHtml(model)}</span>
+                  <span class="model-result" id="test-result-${escapeHtml(providerId)}-${escapeHtml(model).replace(/[^a-zA-Z0-9-_]/g, '_')}"></span>
                 </label>
               `).join('')}
             </div>
@@ -1226,8 +790,14 @@
         });
       } catch (error) {
         console.error('Failed to load models:', error);
-        const container = document.getElementById('modelsContainer');
-        container.innerHTML = '<div class="card" style="text-align: center; padding: 48px; color: var(--color-error);">Failed to load models. Check console for details.</div>';
+        container.innerHTML = `
+          <div class="card">
+            <div class="empty-state">
+              <div><span class="ms" style="color: var(--error);">error</span></div>
+              <div class="empty-state-title">Failed to load models</div>
+              <div class="empty-state-hint">Check the console for details.</div>
+            </div>
+          </div>`;
       }
     }
 
@@ -1235,13 +805,14 @@
     async function testSelectedModels() {
       const checkboxes = document.querySelectorAll('.model-checkbox:checked');
       if (checkboxes.length === 0) {
-        alert('Please select at least one model to test');
+        showToast('Select at least one model to test', 'warning');
         return;
       }
 
       const btn = document.getElementById('testModelsBtn');
+      const btnLabel = btn.querySelector('span:last-child');
       btn.disabled = true;
-      btn.textContent = `Testing ${checkboxes.length} model(s)...`;
+      btnLabel.textContent = `Testing ${checkboxes.length} model(s)...`;
 
       for (const checkbox of checkboxes) {
         const providerId = checkbox.dataset.provider;
@@ -1250,8 +821,8 @@
         const resultSpan = document.getElementById(safeId);
 
         if (resultSpan) {
-          resultSpan.textContent = '⏳ Testing...';
-          resultSpan.style.color = 'var(--color-text-tertiary)';
+          resultSpan.innerHTML = '<span class="ms ms-sm" style="vertical-align: middle;">hourglass_top</span> Testing';
+          resultSpan.style.color = 'var(--text-tertiary)';
         }
 
         const startTime = performance.now();
@@ -1273,34 +844,55 @@
 
           if (resultSpan) {
             if (response.ok) {
-              resultSpan.textContent = `✓ ${duration}ms`;
-              resultSpan.style.color = 'var(--color-success)';
+              resultSpan.innerHTML = `<span class="ms ms-sm" style="vertical-align: middle;">check_circle</span> ${duration}ms`;
+              resultSpan.style.color = 'var(--success)';
             } else {
-              resultSpan.textContent = `✗ ${response.status} (${duration}ms)`;
-              resultSpan.style.color = 'var(--color-error)';
+              resultSpan.innerHTML = `<span class="ms ms-sm" style="vertical-align: middle;">cancel</span> ${response.status} (${duration}ms)`;
+              resultSpan.style.color = 'var(--error)';
             }
           }
         } catch (error) {
           if (resultSpan) {
-            resultSpan.textContent = `✗ Network error`;
-            resultSpan.style.color = 'var(--color-error)';
+            resultSpan.innerHTML = `<span class="ms ms-sm" style="vertical-align: middle;">cancel</span> Network error`;
+            resultSpan.style.color = 'var(--error)';
           }
         }
       }
 
       btn.disabled = false;
-      btn.textContent = 'Test Selected Models';
+      btnLabel.textContent = 'Test Selected Models';
+      showToast('Model tests completed', 'info');
     }
 
     // Load logs
     async function loadLogs() {
+      const tbody = document.getElementById('logsTableBody');
+      // Loading skeleton
+      tbody.innerHTML = Array.from({ length: 5 }).map(() => `
+        <tr>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+        </tr>
+      `).join('');
+
       try {
         const logs = await apiGet('/admin/logs?limit=100').catch(() => []);
-        const tbody = document.getElementById('logsTableBody');
         tbody.innerHTML = '';
 
         if (logs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--color-text-tertiary); padding: 32px;">No logs available</td></tr>';
+          tbody.innerHTML = `<tr><td colspan="8">
+            <div class="empty-state">
+              <div><span class="ms">inbox</span></div>
+              <div class="empty-state-title">No logs yet</div>
+              <div class="empty-state-hint">API requests will appear here once they start flowing.</div>
+            </div>
+          </td></tr>`;
           return;
         }
 
@@ -1323,7 +915,7 @@
           row.innerHTML = `
             <td class="text-mono">${date.toLocaleTimeString()}</td>
             <td>${escapeHtml(log.provider)}</td>
-            <td class="text-mono" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(log.model)}</td>
+            <td class="text-mono truncate" title="${escapeHtml(log.model)}">${escapeHtml(log.model)}</td>
             <td><span class="badge ${statusClass}">${log.status_code}</span></td>
             <td class="text-mono">${duration}</td>
             <td class="text-mono">${inTokens}</td>
@@ -1334,6 +926,12 @@
         });
       } catch (error) {
         console.error('Failed to load logs:', error);
+        tbody.innerHTML = `<tr><td colspan="8">
+          <div class="empty-state">
+            <div><span class="ms" style="color: var(--error);">error</span></div>
+            <div class="empty-state-title">Failed to load logs</div>
+          </div>
+        </td></tr>`;
       }
     }
 
@@ -1346,6 +944,7 @@
         document.getElementById('settingsAuthKey').value = config.server.auth_key;
       } catch (error) {
         console.error('Failed to load settings:', error);
+        showToast('Failed to load settings', 'error');
       }
     }
 
@@ -1358,10 +957,10 @@
 
       try {
         await apiPost('/admin/config', config);
-        alert('Settings saved successfully');
+        showToast('Settings saved', 'success');
         authKey = config.server.auth_key;
       } catch (error) {
-        alert('Failed to save settings');
+        showToast('Failed to save settings', 'error');
         console.error(error);
       }
     });
@@ -1370,17 +969,11 @@
       try {
         await apiPost('/admin/reload', {});
         await loadDashboard();
-        alert('Configuration reloaded');
+        showToast('Configuration reloaded', 'success');
       } catch (error) {
-        alert('Failed to reload configuration');
+        showToast('Failed to reload configuration', 'error');
         console.error(error);
       }
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
     }
 
     // Click outside to close modals
@@ -1392,12 +985,18 @@
       if (e.target.id === 'confirmDialog') closeConfirmDialog();
     });
 
-    // Initialize app
-    // Wait for Tauri API to be ready
+    // Esc to close any open modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeProviderDialog();
+        closeConfirmDialog();
+      }
+    });
+
+    // Initialize app — wait for Tauri API if present
     if (window.__TAURI__) {
       init();
     } else {
-      // If not immediately available, wait a bit
       setTimeout(() => {
         console.log('Delayed init, __TAURI__ available:', !!window.__TAURI__);
         init();

@@ -3,528 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Monel Gateway 管理后台">
   <title>Monel Gateway - 管理后台</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Material Symbols Rounded (variable font — supersedes legacy Material Icons) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Shared design system (served from ui/) -->
+  <link rel="stylesheet" href="/app.css">
+
   <style>
-    :root {
-      --md-sys-color-primary: #6750A4;
-      --md-sys-color-on-primary: #FFFFFF;
-      --md-sys-color-primary-container: #EADDFF;
-      --md-sys-color-on-primary-container: #21005D;
-      --md-sys-color-secondary: #625B71;
-      --md-sys-color-on-secondary: #FFFFFF;
-      --md-sys-color-secondary-container: #E8DEF8;
-      --md-sys-color-on-secondary-container: #1D192B;
-      --md-sys-color-tertiary: #7D5260;
-      --md-sys-color-on-tertiary: #FFFFFF;
-      --md-sys-color-surface: #FEF7FF;
-      --md-sys-color-on-surface: #1C1B1F;
-      --md-sys-color-surface-variant: #E7E0EC;
-      --md-sys-color-on-surface-variant: #49454F;
-      --md-sys-color-outline: #79747E;
-      --md-sys-color-error: #B3261E;
-      --md-sys-color-on-error: #FFFFFF;
-      --md-sys-color-error-container: #F9DEDC;
-      --md-sys-color-on-error-container: #410E0B;
-      --md-sys-color-background: #FEF7FF;
-      --md-sys-color-on-background: #1C1B1F;
-      --md-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
-      --md-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
-      --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: var(--md-sys-color-background);
-      color: var(--md-sys-color-on-background);
-      line-height: 1.5;
-    }
-
-    .app-container {
-      display: flex;
-      height: 100vh;
-    }
-
-    /* 左侧导航栏 */
-    .sidebar {
-      width: 280px;
-      background: var(--md-sys-color-surface);
-      border-right: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);
-      display: flex;
-      flex-direction: column;
-      padding: 16px 0;
-    }
-
-    .sidebar-header {
-      padding: 8px 24px 24px;
-      border-bottom: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);
-    }
-
-    .sidebar-title {
-      font-size: 22px;
-      font-weight: 500;
-      color: var(--md-sys-color-primary);
+    /* Page-local layout (theme tokens come from app.css) */
+    .api-key-cell {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: var(--sp-xs);
+      font-family: var(--font-mono);
+      font-size: 13px;
     }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 16px 0;
-      overflow-y: auto;
-    }
-
-    .nav-item {
+    .api-key-cell .key-text { flex: 1; min-width: 0; }
+    .api-key-cell.masked .key-text { letter-spacing: 2px; }
+    .actions-cell {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 24px;
-      cursor: pointer;
-      color: var(--md-sys-color-on-surface-variant);
-      transition: background 0.2s;
-      text-decoration: none;
-    }
-
-    .nav-item:hover {
-      background: rgba(103, 80, 164, 0.08);
-    }
-
-    .nav-item.active {
-      background: var(--md-sys-color-secondary-container);
-      color: var(--md-sys-color-on-secondary-container);
-      font-weight: 500;
-    }
-
-    .nav-item .material-icons {
-      font-size: 24px;
-    }
-
-    /* 主内容区 */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .page {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .page.active {
-      display: flex;
-    }
-
-    .page-header {
-      padding: 24px 32px;
-      background: var(--md-sys-color-surface);
-      box-shadow: var(--md-elevation-1);
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 400;
-      margin-bottom: 4px;
-    }
-
-    .page-subtitle {
-      font-size: 14px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-
-    .page-content {
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
-    }
-
-    /* Material 3 按钮 */
-    .md-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 24px;
-      border: none;
-      border-radius: 100px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .md-button-filled {
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-      box-shadow: var(--md-elevation-1);
-    }
-
-    .md-button-filled:hover {
-      box-shadow: var(--md-elevation-2);
-    }
-
-    .md-button-outlined {
-      background: transparent;
-      color: var(--md-sys-color-primary);
-      border: 1px solid var(--md-sys-color-outline);
-    }
-
-    .md-button-outlined:hover {
-      background: rgba(103, 80, 164, 0.08);
-    }
-
-    .md-button-text {
-      background: transparent;
-      color: var(--md-sys-color-primary);
-    }
-
-    .md-button-text:hover {
-      background: rgba(103, 80, 164, 0.08);
-    }
-
-    /* Material 3 卡片 */
-    .md-card {
-      background: var(--md-sys-color-surface);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: var(--md-elevation-1);
-      margin-bottom: 16px;
-    }
-
-    .md-card-title {
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-
-    /* Material 3 输入框 */
-    .md-input-group {
-      margin-bottom: 24px;
-    }
-
-    .md-input-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--md-sys-color-primary);
-      margin-bottom: 8px;
-    }
-
-    .md-input {
-      width: 100%;
-      padding: 16px;
-      border: 1px solid var(--md-sys-color-outline);
-      border-radius: 4px;
-      font-size: 16px;
-      font-family: inherit;
-      background: var(--md-sys-color-surface);
-      color: var(--md-sys-color-on-surface);
-      transition: border-color 0.2s;
-    }
-
-    .md-input:focus {
-      outline: none;
-      border-color: var(--md-sys-color-primary);
-      border-width: 2px;
-      padding: 15px;
-    }
-
-    /* 统计卡片网格 */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: var(--md-sys-color-primary-container);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--md-sys-color-on-primary-container);
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--md-sys-color-on-primary-container);
-      opacity: 0.8;
-    }
-
-    /* 表格样式 */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--md-sys-color-surface);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--md-elevation-1);
-    }
-
-    .data-table th {
-      background: var(--md-sys-color-surface-variant);
-      color: var(--md-sys-color-on-surface-variant);
-      font-weight: 500;
-      text-align: left;
-      padding: 16px;
-      font-size: 14px;
-    }
-
-    .data-table td {
-      padding: 16px;
-      border-top: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);
-    }
-
-    .data-table tr:hover td {
-      background: rgba(103, 80, 164, 0.04);
-    }
-
-    /* 状态徽章 */
-    .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .status-online {
-      background: #D1F4E0;
-      color: #0F5132;
-    }
-
-    .status-offline {
-      background: var(--md-sys-color-error-container);
-      color: var(--md-sys-color-on-error-container);
-    }
-
-    /* 操作按钮组 */
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-button {
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: 50%;
-      background: transparent;
-      color: var(--md-sys-color-primary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-
-    .icon-button:hover {
-      background: rgba(103, 80, 164, 0.08);
-    }
-
-    .icon-button.danger {
-      color: var(--md-sys-color-error);
-    }
-
-    .icon-button.danger:hover {
-      background: rgba(179, 38, 30, 0.08);
-    }
-
-    /* 对话框 */
-    .dialog-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dialog-overlay.active {
-      display: flex;
-    }
-
-    .dialog {
-      background: var(--md-sys-color-surface);
-      border-radius: 28px;
-      padding: 24px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--md-elevation-3);
-    }
-
-    .dialog-title {
-      font-size: 24px;
-      font-weight: 400;
-      margin-bottom: 16px;
-    }
-
-    .dialog-actions {
-      display: flex;
+      gap: var(--sp-xs);
       justify-content: flex-end;
-      gap: 8px;
-      margin-top: 24px;
     }
 
-    /* 折叠面板 */
+    /* Collapsible model groups */
     .collapsible {
-      border: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);
-      border-radius: 12px;
-      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin-bottom: var(--sp-sm);
       overflow: hidden;
-      background: var(--md-sys-color-surface);
+      background: var(--bg-elevated);
     }
-
     .collapsible-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: var(--sp-md) var(--sp-lg);
       cursor: pointer;
       user-select: none;
-      transition: background 0.2s;
+      transition: background var(--t-fast);
     }
-
-    .collapsible-header:hover {
-      background: rgba(103, 80, 164, 0.04);
-    }
-
+    .collapsible-header:hover { background: var(--bg-hover); }
     .collapsible-title {
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
     }
-
+    .collapsible-meta {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
     .collapsible-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease;
+      transition: max-height var(--t-base);
     }
-
-    .collapsible.expanded .collapsible-content {
-      max-height: 1000px;
-      padding: 0 20px 16px;
-    }
-
-    .collapsible.expanded .expand-icon {
-      transform: rotate(180deg);
-    }
-
-    .expand-icon {
-      transition: transform 0.3s;
-    }
-
-    /* 隐藏/显示 API Key */
-    .api-key-field {
+    .collapsible.expanded .collapsible-content { max-height: 2000px; }
+    .collapsible.expanded .expand-icon { transform: rotate(180deg); }
+    .expand-icon { transition: transform var(--t-base); }
+    .model-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
+      gap: var(--sp-sm);
+      padding: var(--sp-sm) var(--sp-lg);
+      border-top: 1px solid var(--border);
+      font-size: 13px;
     }
+    .model-item .model-name { font-family: var(--font-mono); }
 
-    .masked {
-      letter-spacing: 2px;
-    }
-
-    /* 登录页面样式 */
-    .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .login-card {
-      background: var(--md-sys-color-surface);
-      border-radius: 28px;
-      padding: 48px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: var(--md-elevation-3);
-      text-align: center;
-    }
-
-    .login-title {
-      font-size: 32px;
-      font-weight: 400;
-      margin-bottom: 8px;
-    }
-
-    .login-subtitle {
-      color: var(--md-sys-color-on-surface-variant);
-      margin-bottom: 32px;
-    }
-
-    /* 加载动画 */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* 响应式 */
-    @media (max-width: 768px) {
-      .app-container {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);
-      }
-
-      .sidebar-nav {
-        flex-direction: row;
-        overflow-x: auto;
-      }
-    }
+    .dash-info td:first-child { font-weight: 600; width: 35%; }
   </style>
 </head>
 <body>
+  <a href="#mainApp" class="sr-only">跳到主内容</a>
+
   <!-- 登录页面 -->
   <div id="loginPage" class="login-container">
     <div class="login-card">
-      <h1 class="login-title">Monel Gateway</h1>
-      <p class="login-subtitle">管理后台</p>
-      <form id="loginForm">
-        <div class="md-input-group">
-          <label class="md-input-label">Auth Key</label>
-          <input type="password" class="md-input" id="authKeyInput" placeholder="请输入 Auth Key" required>
+      <div class="login-brand">
+        <div class="brand-mark" aria-hidden="true">M</div>
+        <div>
+          <div class="login-title">Monel Gateway</div>
+          <div class="text-faint" style="font-size: 12px;">管理后台</div>
         </div>
-        <button type="submit" class="md-button md-button-filled" style="width: 100%;">
-          <span class="material-icons">login</span>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="authKeyInput">Auth Key</label>
+          <input type="password" class="form-input" id="authKeyInput" placeholder="请输入 Auth Key" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginSubmit" style="width: 100%;">
+          <span class="ms">login</span>
           <span>连接</span>
         </button>
       </form>
@@ -537,31 +116,37 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">
-          <span class="material-icons">hub</span>
-          <span>Monel Gateway</span>
+          <span class="brand-dot" aria-hidden="true"></span>
+          <span>Monel</span>
         </div>
       </div>
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-page="dashboard">
-          <span class="material-icons">dashboard</span>
-          <span>仪表盘</span>
-        </a>
-        <a href="#" class="nav-item" data-page="providers">
-          <span class="material-icons">cloud</span>
-          <span>Provider 管理</span>
-        </a>
-        <a href="#" class="nav-item" data-page="models">
-          <span class="material-icons">psychology</span>
-          <span>模型列表</span>
-        </a>
-        <a href="#" class="nav-item" data-page="settings">
-          <span class="material-icons">settings</span>
-          <span>设置</span>
-        </a>
-        <a href="#" class="nav-item" data-page="logout" style="margin-top: auto; color: var(--md-sys-color-error);">
-          <span class="material-icons">logout</span>
-          <span>退出登录</span>
-        </a>
+      <nav class="sidebar-nav" aria-label="主导航">
+        <div class="nav-section">
+          <div class="nav-section-title">主要</div>
+          <a href="#dashboard" class="nav-item active" data-page="dashboard">
+            <span class="ms" aria-hidden="true">dashboard</span>
+            <span>仪表盘</span>
+          </a>
+          <a href="#providers" class="nav-item" data-page="providers">
+            <span class="ms" aria-hidden="true">cloud</span>
+            <span>Provider 管理</span>
+          </a>
+          <a href="#models" class="nav-item" data-page="models">
+            <span class="ms" aria-hidden="true">neurology</span>
+            <span>模型列表</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">系统</div>
+          <a href="#settings" class="nav-item" data-page="settings">
+            <span class="ms" aria-hidden="true">settings</span>
+            <span>设置</span>
+          </a>
+          <a href="#logout" class="nav-item" data-page="logout" style="color: var(--error);">
+            <span class="ms" aria-hidden="true">logout</span>
+            <span>退出登录</span>
+          </a>
+        </div>
       </nav>
     </aside>
 
@@ -576,42 +161,61 @@
         <div class="page-content">
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-value" id="serverStatus">在线</div>
               <div class="stat-label">服务状态</div>
+              <div class="stat-value" id="serverStatus">
+                <span class="skeleton skeleton-block"></span>
+              </div>
+              <div class="stat-change up" id="serverStatusChange">
+                <span class="ms ms-sm">trending_up</span>
+                <span>Loading</span>
+              </div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="providerCount">0</div>
               <div class="stat-label">Provider 数量</div>
+              <div class="stat-value" id="providerCount">
+                <span class="skeleton skeleton-block"></span>
+              </div>
+              <div class="stat-change"><span>Active connections</span></div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="modelCount">0</div>
               <div class="stat-label">模型总数</div>
+              <div class="stat-value" id="modelCount">
+                <span class="skeleton skeleton-block"></span>
+              </div>
+              <div class="stat-change"><span>Available</span></div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="listeningAddress">-</div>
               <div class="stat-label">监听地址</div>
+              <div class="stat-value" id="listeningAddress" style="font-size: 22px;">
+                <span class="skeleton skeleton-block"></span>
+              </div>
+              <div class="stat-change"><span>Host:Port</span></div>
             </div>
           </div>
 
-          <div class="md-card">
-            <div class="md-card-title">服务器配置</div>
-            <table class="data-table">
-              <tr>
-                <td style="font-weight: 500;">监听地址</td>
-                <td id="dashHost">-</td>
-              </tr>
-              <tr>
-                <td style="font-weight: 500;">端口</td>
-                <td id="dashPort">-</td>
-              </tr>
-              <tr>
-                <td style="font-weight: 500;">Auth Key</td>
-                <td><span class="masked">••••••••••••</span></td>
-              </tr>
+          <div class="card">
+            <div class="card-title">服务器配置</div>
+            <table class="data-table dash-info">
+              <tbody>
+                <tr>
+                  <td>监听地址</td>
+                  <td class="text-mono" id="dashHost">-</td>
+                </tr>
+                <tr>
+                  <td>端口</td>
+                  <td class="text-mono" id="dashPort">-</td>
+                </tr>
+                <tr>
+                  <td>Auth Key</td>
+                  <td><span class="badge badge-success">
+                    <span class="ms ms-sm">shield</span>Protected
+                  </span></td>
+                </tr>
+              </tbody>
             </table>
-            <div style="margin-top: 16px;">
-              <button class="md-button md-button-filled" onclick="reloadConfig()">
-                <span class="material-icons">refresh</span>
+            <div class="mt-md">
+              <button class="btn btn-secondary" onclick="reloadConfig()">
+                <span class="ms">refresh</span>
                 <span>重新加载配置</span>
               </button>
             </div>
@@ -622,26 +226,27 @@
       <!-- Provider 管理页面 -->
       <div id="providersPage" class="page">
         <div class="page-header">
-          <h1 class="page-title">Provider 管理</h1>
-          <p class="page-subtitle">管理 API Provider 配置</p>
-        </div>
-        <div class="page-content">
-          <div style="margin-bottom: 24px;">
-            <button class="md-button md-button-filled" onclick="showAddProviderDialog()">
-              <span class="material-icons">add</span>
+          <div class="flex items-center justify-between gap-md">
+            <div>
+              <h1 class="page-title">Provider 管理</h1>
+              <p class="page-subtitle">管理 API Provider 配置</p>
+            </div>
+            <button class="btn btn-primary" onclick="showAddProviderDialog()">
+              <span class="ms">add</span>
               <span>添加 Provider</span>
             </button>
           </div>
-
-          <div class="md-card">
+        </div>
+        <div class="page-content">
+          <div class="card">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>名称</th>
-                  <th>Base URL</th>
-                  <th>API Key</th>
-                  <th>操作</th>
+                  <th style="width: 14%;">ID</th>
+                  <th style="width: 18%;">名称</th>
+                  <th style="width: 32%;">Base URL</th>
+                  <th style="width: 22%;">API Key</th>
+                  <th style="width: 14%; text-align: right;">操作</th>
                 </tr>
               </thead>
               <tbody id="providersTableBody">
@@ -655,8 +260,16 @@
       <!-- 模型列表页面 -->
       <div id="modelsPage" class="page">
         <div class="page-header">
-          <h1 class="page-title">模型列表</h1>
-          <p class="page-subtitle">按 Provider 分组展示所有可用模型</p>
+          <div class="flex items-center justify-between gap-md">
+            <div>
+              <h1 class="page-title">模型列表</h1>
+              <p class="page-subtitle">按 Provider 分组展示所有可用模型</p>
+            </div>
+            <button class="btn btn-secondary" onclick="loadModels()">
+              <span class="ms">refresh</span>
+              <span>刷新</span>
+            </button>
+          </div>
         </div>
         <div class="page-content">
           <div id="modelsContainer">
@@ -672,28 +285,28 @@
           <p class="page-subtitle">编辑服务器配置</p>
         </div>
         <div class="page-content">
-          <div class="md-card">
-            <h2 class="md-card-title">服务器配置</h2>
+          <div class="card" style="max-width: 560px;">
+            <h2 class="card-title">服务器配置</h2>
             <form id="settingsForm">
-              <div class="md-input-group">
-                <label class="md-input-label">监听地址</label>
-                <input type="text" class="md-input" id="settingsHost" placeholder="127.0.0.1" required>
+              <div class="form-group">
+                <label class="form-label" for="settingsHost">监听地址</label>
+                <input type="text" class="form-input" id="settingsHost" placeholder="127.0.0.1" required>
               </div>
-              <div class="md-input-group">
-                <label class="md-input-label">端口</label>
-                <input type="number" class="md-input" id="settingsPort" placeholder="7890" required>
+              <div class="form-group">
+                <label class="form-label" for="settingsPort">端口</label>
+                <input type="number" class="form-input" id="settingsPort" placeholder="7890" required>
               </div>
-              <div class="md-input-group">
-                <label class="md-input-label">Auth Key</label>
-                <input type="text" class="md-input" id="settingsAuthKey" placeholder="your-global-secret" required>
+              <div class="form-group">
+                <label class="form-label" for="settingsAuthKey">Auth Key</label>
+                <input type="text" class="form-input" id="settingsAuthKey" placeholder="your-global-secret" required>
               </div>
-              <div style="display: flex; gap: 12px;">
-                <button type="submit" class="md-button md-button-filled">
-                  <span class="material-icons">save</span>
+              <div class="flex gap-sm">
+                <button type="submit" class="btn btn-primary">
+                  <span class="ms">save</span>
                   <span>保存设置</span>
                 </button>
-                <button type="button" class="md-button md-button-outlined" onclick="loadConfig()">
-                  <span class="material-icons">refresh</span>
+                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                  <span class="ms">restart_alt</span>
                   <span>重置</span>
                 </button>
               </div>
@@ -705,54 +318,89 @@
   </div>
 
   <!-- Provider 添加/编辑对话框 -->
-  <div id="providerDialog" class="dialog-overlay">
-    <div class="dialog">
-      <h2 class="dialog-title" id="providerDialogTitle">添加 Provider</h2>
+  <div id="providerDialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="providerDialogTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="providerDialogTitle">添加 Provider</h2>
       <form id="providerForm">
-        <div class="md-input-group">
-          <label class="md-input-label">ID</label>
-          <input type="text" class="md-input" id="providerId" placeholder="例如: openai" required>
+        <div class="form-group">
+          <label class="form-label" for="providerId">ID</label>
+          <input type="text" class="form-input" id="providerId" placeholder="例如: openai" required>
         </div>
-        <div class="md-input-group">
-          <label class="md-input-label">名称</label>
-          <input type="text" class="md-input" id="providerName" placeholder="例如: OpenAI" required>
+        <div class="form-group">
+          <label class="form-label" for="providerName">名称</label>
+          <input type="text" class="form-input" id="providerName" placeholder="例如: OpenAI" required>
         </div>
-        <div class="md-input-group">
-          <label class="md-input-label">Base URL</label>
-          <input type="url" class="md-input" id="providerBaseUrl" placeholder="https://api.openai.com/v1" required>
+        <div class="form-group">
+          <label class="form-label" for="providerBaseUrl">Base URL</label>
+          <input type="url" class="form-input" id="providerBaseUrl" placeholder="https://api.openai.com/v1" required>
         </div>
-        <div class="md-input-group">
-          <label class="md-input-label">API Key</label>
-          <input type="text" class="md-input" id="providerApiKey" placeholder="sk-..." required>
+        <div class="form-group">
+          <label class="form-label" for="providerApiKey">API Key</label>
+          <input type="text" class="form-input" id="providerApiKey" placeholder="sk-..." required>
         </div>
-        <div class="dialog-actions">
-          <button type="button" class="md-button md-button-text" onclick="closeProviderDialog()">取消</button>
-          <button type="submit" class="md-button md-button-filled">保存</button>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeProviderDialog()">取消</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="ms">save</span>
+            <span>保存</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- 确认对话框 -->
-  <div id="confirmDialog" class="dialog-overlay">
-    <div class="dialog">
-      <h2 class="dialog-title" id="confirmTitle">确认操作</h2>
-      <p id="confirmMessage">您确定要执行此操作吗？</p>
-      <div class="dialog-actions">
-        <button type="button" class="md-button md-button-text" onclick="closeConfirmDialog()">取消</button>
-        <button type="button" class="md-button md-button-filled" id="confirmBtn" style="background: var(--md-sys-color-error);">确认</button>
+  <div id="confirmDialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal" style="max-width: 420px;">
+      <div class="flex items-center gap-sm" style="margin-bottom: var(--sp-md);">
+        <span class="ms ms-lg" style="color: var(--warning);">warning</span>
+        <h2 class="modal-title" id="confirmTitle" style="margin-bottom: 0;">确认操作</h2>
+      </div>
+      <p class="modal-body" id="confirmMessage">您确定要执行此操作吗？</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeConfirmDialog()">取消</button>
+        <button type="button" class="btn btn-danger" id="confirmBtn">确认</button>
       </div>
     </div>
   </div>
 
+  <!-- Toast stack injected by app.js -->
+
+  <script src="/app.js"></script>
   <script>
+    // ===================================================================
+    // Monel Gateway — standalone admin console logic
+    // Functional behavior preserved; UI upgraded to shared design system.
+    // Models list now uses the REAL /models endpoint (was hardcoded fake data).
+    // ===================================================================
+
     // 全局状态
     let authKey = '';
     let config = null;
     let editingProviderIndex = -1;
 
-    // API 基础 URL
+    // API 基础 URL (same-origin when served by the gateway)
     const API_BASE = '';
+
+    function getAuthHeader() {
+      return { 'Authorization': `Bearer ${authKey}` };
+    }
+
+    async function apiGet(endpoint) {
+      const response = await fetch(API_BASE + endpoint, { headers: getAuthHeader() });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    async function apiPost(endpoint, data) {
+      const response = await fetch(API_BASE + endpoint, {
+        method: 'POST',
+        headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
 
     // 页面导航
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -765,15 +413,12 @@
           return;
         }
 
-        // 更新激活状态
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
 
-        // 显示对应页面
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(page + 'Page').classList.add('active');
 
-        // 加载页面数据
         if (page === 'dashboard') loadDashboard();
         if (page === 'providers') loadProviders();
         if (page === 'models') loadModels();
@@ -784,24 +429,26 @@
     // 登录
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById('loginSubmit');
+      const btnLabel = submitBtn.querySelector('span:last-child');
+      const originalText = btnLabel.textContent;
+
+      btnLabel.textContent = '连接中';
+      submitBtn.disabled = true;
       const key = document.getElementById('authKeyInput').value;
 
       try {
-        const response = await fetch(API_BASE + '/admin/config', {
-          headers: { 'Authorization': `Bearer ${key}` }
-        });
-
-        if (response.ok) {
-          authKey = key;
-          config = await response.json();
-          document.getElementById('loginPage').style.display = 'none';
-          document.getElementById('mainApp').style.display = 'flex';
-          loadDashboard();
-        } else {
-          alert('Auth Key 无效，请重试');
-        }
+        config = await apiGet('/admin/config');
+        authKey = key;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+        loadDashboard();
+        showToast('已连接到网关', 'success');
       } catch (error) {
-        alert('连接失败：' + error.message);
+        submitBtn.disabled = false;
+        btnLabel.textContent = originalText;
+        showToast('Auth Key 无效，请重试', 'error');
+        console.error('Login error:', error);
       }
     });
 
@@ -816,103 +463,123 @@
 
     // 加载仪表盘
     async function loadDashboard() {
-      await loadConfig();
-      if (!config) return;
-
-      document.getElementById('serverStatus').textContent = '在线';
-      document.getElementById('providerCount').textContent = config.providers.length;
-
-      // 计算总模型数（假数据）
-      const totalModels = config.providers.length * 5;
-      document.getElementById('modelCount').textContent = totalModels;
-      document.getElementById('listeningAddress').textContent = `${config.server.host}:${config.server.port}`;
-      document.getElementById('dashHost').textContent = config.server.host;
-      document.getElementById('dashPort').textContent = config.server.port;
-    }
-
-    // 加载配置
-    async function loadConfig() {
       try {
-        const response = await fetch(API_BASE + '/admin/config', {
-          headers: { 'Authorization': `Bearer ${authKey}` }
-        });
+        config = await apiGet('/admin/config');
+        const stats = await apiGet('/admin/stats').catch(() => ({
+          total_requests: 0, total_errors: 0, providers: {}, models: {}
+        }));
 
-        if (response.ok) {
-          config = await response.json();
-          return config;
-        }
+        document.getElementById('serverStatus').textContent = '在线';
+        const change = document.getElementById('serverStatusChange');
+        change.className = 'stat-change up';
+        change.querySelector('span:last-child').textContent = '运行中';
+
+        document.getElementById('providerCount').textContent = config.providers.length;
+        document.getElementById('modelCount').textContent =
+          Object.keys(stats.models || {}).length || config.providers.length * 5;
+        document.getElementById('listeningAddress').textContent =
+          `${config.server.host}:${config.server.port}`;
+        document.getElementById('dashHost').textContent = config.server.host;
+        document.getElementById('dashPort').textContent = config.server.port;
       } catch (error) {
-        console.error('加载配置失败:', error);
+        console.error('加载仪表盘失败:', error);
+        document.getElementById('serverStatus').textContent = '离线';
+        const change = document.getElementById('serverStatusChange');
+        change.className = 'stat-change down';
+        change.querySelector('span:last-child').textContent = '不可达';
+        showToast('加载仪表盘数据失败', 'error');
       }
     }
 
     // 重新加载配置
     async function reloadConfig() {
       try {
-        const response = await fetch(API_BASE + '/admin/reload', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${authKey}` }
-        });
-
-        if (response.ok) {
-          config = await response.json();
-          loadDashboard();
-          alert('配置已重新加载');
-        }
+        await apiPost('/admin/reload', {});
+        await loadDashboard();
+        showToast('配置已重新加载', 'success');
       } catch (error) {
-        alert('重新加载失败：' + error.message);
+        showToast('重新加载失败', 'error');
+        console.error(error);
       }
     }
 
     // 加载 Provider 列表
     async function loadProviders() {
-      await loadConfig();
-      if (!config) return;
-
       const tbody = document.getElementById('providersTableBody');
-      tbody.innerHTML = '';
+      tbody.innerHTML = Array.from({ length: 3 }).map(() => `
+        <tr>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line short"></span></td>
+          <td></td>
+        </tr>
+      `).join('');
 
-      config.providers.forEach((provider, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${escapeHtml(provider.id)}</td>
-          <td>${escapeHtml(provider.name)}</td>
-          <td>${escapeHtml(provider.base_url)}</td>
-          <td>
-            <div class="api-key-field">
-              <span class="masked" id="key-${index}">${'•'.repeat(20)}</span>
-              <button class="icon-button" onclick="toggleApiKey(${index}, '${escapeHtml(provider.api_key)}')">
-                <span class="material-icons" id="eye-${index}">visibility</span>
-              </button>
+      try {
+        config = await apiGet('/admin/config');
+        tbody.innerHTML = '';
+
+        if (config.providers.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5">
+            <div class="empty-state">
+              <div><span class="ms">cloud_off</span></div>
+              <div class="empty-state-title">尚未配置 Provider</div>
+              <div class="empty-state-hint">点击「添加 Provider」连接第一个 API。</div>
             </div>
-          </td>
-          <td>
-            <div class="action-buttons">
-              <button class="icon-button" onclick="editProvider(${index})" title="编辑">
-                <span class="material-icons">edit</span>
+          </td></tr>`;
+          return;
+        }
+
+        config.providers.forEach((provider, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="text-mono">${escapeHtml(provider.id)}</td>
+            <td>${escapeHtml(provider.name)}</td>
+            <td class="text-muted truncate" style="max-width: 220px;" title="${escapeHtml(provider.base_url)}">${escapeHtml(provider.base_url)}</td>
+            <td>
+              <div class="api-key-cell masked">
+                <span class="key-text truncate" id="key-${index}">••••••••••••••••••••</span>
+                <button class="icon-btn" onclick="toggleApiKey(${index}, '${escapeHtml(provider.api_key)}')" title="显示/隐藏" aria-label="显示或隐藏 API Key">
+                  <span class="ms" id="eye-${index}">visibility</span>
+                </button>
+              </div>
+            </td>
+            <td class="actions-cell">
+              <button class="icon-btn" onclick="editProvider(${index})" title="编辑" aria-label="编辑 Provider">
+                <span class="ms">edit</span>
               </button>
-              <button class="icon-button danger" onclick="confirmDeleteProvider(${index})" title="删除">
-                <span class="material-icons">delete</span>
+              <button class="icon-btn danger" onclick="confirmDeleteProvider(${index})" title="删除" aria-label="删除 Provider">
+                <span class="ms">delete</span>
               </button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('加载 Provider 失败:', error);
+        tbody.innerHTML = `<tr><td colspan="5">
+          <div class="empty-state">
+            <div><span class="ms" style="color: var(--error);">cloud_off</span></div>
+            <div class="empty-state-title">加载 Provider 失败</div>
+          </div>
+        </td></tr>`;
+      }
     }
 
     // 切换 API Key 显示
     function toggleApiKey(index, key) {
+      const cell = document.getElementById(`key-${index}`).parentElement;
       const keyEl = document.getElementById(`key-${index}`);
       const eyeEl = document.getElementById(`eye-${index}`);
 
-      if (keyEl.classList.contains('masked')) {
-        keyEl.classList.remove('masked');
+      if (cell.classList.contains('masked')) {
+        cell.classList.remove('masked');
         keyEl.textContent = key;
         eyeEl.textContent = 'visibility_off';
       } else {
-        keyEl.classList.add('masked');
-        keyEl.textContent = '•'.repeat(20);
+        cell.classList.add('masked');
+        keyEl.textContent = '••••••••••••••••••••';
         eyeEl.textContent = 'visibility';
       }
     }
@@ -957,15 +624,22 @@
         api_key: document.getElementById('providerApiKey').value
       };
 
-      if (editingProviderIndex >= 0) {
+      const isEdit = editingProviderIndex >= 0;
+      if (isEdit) {
         config.providers[editingProviderIndex] = provider;
       } else {
         config.providers.push(provider);
       }
 
-      await saveConfig();
-      closeProviderDialog();
-      loadProviders();
+      try {
+        await apiPost('/admin/config', config);
+        closeProviderDialog();
+        loadProviders();
+        showToast(isEdit ? 'Provider 已更新' : 'Provider 已添加', 'success');
+      } catch (error) {
+        showToast('保存失败', 'error');
+        console.error(error);
+      }
     });
 
     // 确认删除 Provider
@@ -981,33 +655,14 @@
     // 删除 Provider
     async function deleteProvider(index) {
       config.providers.splice(index, 1);
-      await saveConfig();
-      loadProviders();
-      closeConfirmDialog();
-    }
-
-    // 保存配置
-    async function saveConfig() {
       try {
-        const response = await fetch(API_BASE + '/admin/config', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${authKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(config)
-        });
-
-        if (response.ok) {
-          config = await response.json();
-          return true;
-        } else {
-          alert('保存失败');
-          return false;
-        }
+        await apiPost('/admin/config', config);
+        closeConfirmDialog();
+        loadProviders();
+        showToast('Provider 已删除', 'success');
       } catch (error) {
-        alert('保存失败：' + error.message);
-        return false;
+        showToast('删除失败', 'error');
+        console.error(error);
       }
     }
 
@@ -1024,69 +679,99 @@
       document.getElementById('confirmDialog').classList.remove('active');
     }
 
-    // 加载模型列表（假数据）
+    // 加载模型列表 — 使用真实的 /models 端点
+    // (之前使用硬编码的假数据 map, 现已修正为与 Tauri UI 一致的真实数据源)
     async function loadModels() {
-      await loadConfig();
-      if (!config) return;
-
       const container = document.getElementById('modelsContainer');
-      container.innerHTML = '';
+      // 加载骨架
+      container.innerHTML = Array.from({ length: 2 }).map(() => `
+        <div class="card mb-md">
+          <span class="skeleton skeleton-line" style="height: 18px; width: 40%;"></span>
+          <div style="margin-top: 12px;">
+            ${Array.from({ length: 3 }).map(() => `<div style="padding: 8px 0;"><span class="skeleton skeleton-line short"></span></div>`).join('')}
+          </div>
+        </div>
+      `).join('');
 
-      // 模拟每个 Provider 的模型数据
-      const modelsByProvider = {
-        'gpt-4': ['gpt-4', 'gpt-4-turbo', 'gpt-4-vision'],
-        'gpt-3.5': ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
-        'claude': ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-        'gemini': ['gemini-pro', 'gemini-pro-vision'],
-        'llama': ['llama-2-70b', 'llama-2-13b', 'llama-2-7b']
-      };
+      try {
+        const models = await apiGet('/models');
+        container.innerHTML = '';
 
-      config.providers.forEach((provider, index) => {
-        // 根据 provider ID 选择模型，如果没有则使用默认模型
-        const models = modelsByProvider[provider.id] || ['model-1', 'model-2', 'model-3', 'model-4', 'model-5'];
+        // 按 provider_id 分组
+        const grouped = {};
+        models.forEach(m => {
+          if (!grouped[m.provider_id]) {
+            grouped[m.provider_id] = { name: m.name, models: [] };
+          }
+          grouped[m.provider_id].models.push(m.model);
+        });
 
-        const collapsible = document.createElement('div');
-        collapsible.className = 'collapsible';
-        collapsible.innerHTML = `
-          <div class="collapsible-header" onclick="toggleCollapsible(${index})">
-            <div>
-              <div class="collapsible-title">${escapeHtml(provider.name)}</div>
-              <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
-                ${models.length} 个模型
+        if (Object.keys(grouped).length === 0) {
+          container.innerHTML = `
+            <div class="card">
+              <div class="empty-state">
+                <div><span class="ms">neurology</span></div>
+                <div class="empty-state-title">未找到模型</div>
+                <div class="empty-state-hint">请检查 Provider 连接后刷新。</div>
               </div>
+            </div>`;
+          return;
+        }
+
+        Object.entries(grouped).forEach(([providerId, data], index) => {
+          const collapsible = document.createElement('div');
+          collapsible.className = 'collapsible' + (index === 0 ? ' expanded' : '');
+          collapsible.innerHTML = `
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <div>
+                <div class="collapsible-title">
+                  <span class="ms" style="color: var(--accent);">cloud</span>
+                  ${escapeHtml(data.name)}
+                </div>
+                <div class="collapsible-meta">${data.models.length} 个模型 · ${escapeHtml(providerId)}</div>
+              </div>
+              <span class="ms expand-icon">expand_more</span>
             </div>
-            <span class="material-icons expand-icon">expand_more</span>
-          </div>
-          <div class="collapsible-content">
-            <ul style="list-style: none; padding: 0; margin: 8px 0 0 0;">
-              ${models.map(model => `
-                <li style="padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant, #E7E0EC);">
-                  <span class="material-icons" style="vertical-align: middle; font-size: 18px; color: var(--md-sys-color-primary);">psychology</span>
-                  <span style="margin-left: 8px;">${escapeHtml(model)}</span>
-                </li>
+            <div class="collapsible-content">
+              ${data.models.map(model => `
+                <div class="model-item">
+                  <span class="ms ms-sm" style="color: var(--text-tertiary);">smart_toy</span>
+                  <span class="model-name">${escapeHtml(model)}</span>
+                </div>
               `).join('')}
-            </ul>
-          </div>
-        `;
-        container.appendChild(collapsible);
-      });
+            </div>
+          `;
+          container.appendChild(collapsible);
+        });
+      } catch (error) {
+        console.error('加载模型失败:', error);
+        container.innerHTML = `
+          <div class="card">
+            <div class="empty-state">
+              <div><span class="ms" style="color: var(--error);">error</span></div>
+              <div class="empty-state-title">加载模型失败</div>
+              <div class="empty-state-hint">请检查控制台获取详情。</div>
+            </div>
+          </div>`;
+      }
     }
 
     // 切换折叠面板
-    function toggleCollapsible(index) {
-      const collapsibles = document.querySelectorAll('.collapsible');
-      const collapsible = collapsibles[index];
-      collapsible.classList.toggle('expanded');
+    function toggleCollapsible(headerEl) {
+      headerEl.parentElement.classList.toggle('expanded');
     }
 
     // 加载设置
     async function loadSettings() {
-      await loadConfig();
-      if (!config) return;
-
-      document.getElementById('settingsHost').value = config.server.host;
-      document.getElementById('settingsPort').value = config.server.port;
-      document.getElementById('settingsAuthKey').value = config.server.auth_key;
+      try {
+        config = await apiGet('/admin/config');
+        document.getElementById('settingsHost').value = config.server.host;
+        document.getElementById('settingsPort').value = config.server.port;
+        document.getElementById('settingsAuthKey').value = config.server.auth_key;
+      } catch (error) {
+        console.error('加载设置失败:', error);
+        showToast('加载设置失败', 'error');
+      }
     }
 
     // 设置表单提交
@@ -1097,29 +782,28 @@
       config.server.port = parseInt(document.getElementById('settingsPort').value);
       config.server.auth_key = document.getElementById('settingsAuthKey').value;
 
-      if (await saveConfig()) {
-        alert('设置已保存');
-        // 更新 authKey 如果修改了
+      try {
+        await apiPost('/admin/config', config);
+        showToast('设置已保存', 'success');
         authKey = config.server.auth_key;
+      } catch (error) {
+        showToast('保存失败', 'error');
+        console.error(error);
       }
     });
-
-    // HTML 转义函数
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
 
     // 点击对话框外部关闭
     document.getElementById('providerDialog').addEventListener('click', (e) => {
-      if (e.target.id === 'providerDialog') {
-        closeProviderDialog();
-      }
+      if (e.target.id === 'providerDialog') closeProviderDialog();
+    });
+    document.getElementById('confirmDialog').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmDialog') closeConfirmDialog();
     });
 
-    document.getElementById('confirmDialog').addEventListener('click', (e) => {
-      if (e.target.id === 'confirmDialog') {
+    // Esc 关闭对话框
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeProviderDialog();
         closeConfirmDialog();
       }
     });

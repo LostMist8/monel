@@ -3,157 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Monel Gateway — a lightweight OpenAI-compatible API gateway.">
   <title>Monel Gateway</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Material Symbols Rounded -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Shared design system (served from ui/) -->
+  <link rel="stylesheet" href="/app.css">
+
+  <style>
+    /* Landing-specific layout only */
+    .landing-wrap {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-xl);
+      text-align: center;
+    }
+    .landing-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      margin-bottom: var(--sp-xl);
+    }
+    .landing-brand .brand-mark {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--r-lg);
+      background: linear-gradient(135deg, var(--accent), #7c5cfa);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #fff;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      box-shadow: 0 8px 24px rgba(91,124,250,0.30);
     }
-
-    .container {
-      text-align: center;
-      padding: 40px;
+    .landing-title {
+      font-size: clamp(34px, 5vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: var(--sp-md);
     }
-
-    h1 {
-      font-size: 48px;
-      font-weight: 300;
-      margin-bottom: 16px;
+    .landing-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto var(--sp-xl);
+      line-height: 1.5;
     }
-
-    p {
-      font-size: 20px;
-      margin-bottom: 32px;
-      opacity: 0.9;
-    }
-
-    .links {
+    .landing-links {
       display: flex;
-      gap: 16px;
+      gap: var(--sp-md);
       justify-content: center;
       flex-wrap: wrap;
+      margin-bottom: var(--sp-2xl);
     }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid white;
-      border-radius: 100px;
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 500;
-      transition: all 0.3s;
-      backdrop-filter: blur(10px);
+    .status-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: var(--sp-lg);
     }
-
-    .button:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .button.primary {
-      background: white;
-      color: #667eea;
-    }
-
-    .button.primary:hover {
-      background: #f0f0f0;
-    }
-
-    .status {
-      margin-top: 48px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-    }
-
-    .status-item {
+    .status-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      align-items: center;
+      padding: var(--sp-sm) 0;
       font-size: 14px;
+      border-bottom: 1px solid var(--border);
     }
-
-    .status-label {
-      opacity: 0.8;
-    }
-
-    .status-value {
-      font-weight: 500;
-    }
-
-    .badge {
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: var(--text-secondary); }
+    .status-value { font-weight: 500; color: var(--text-primary); }
+    .status-value .text-mono { font-size: 13px; }
+    .status-dot {
       display: inline-block;
-      padding: 4px 12px;
-      background: #4caf50;
-      border-radius: 100px;
-      font-size: 12px;
-      font-weight: 500;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      margin-right: var(--sp-xs);
+      vertical-align: middle;
+    }
+    .status-dot.offline {
+      background: var(--error);
+      box-shadow: 0 0 8px var(--error);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚀 Monel Gateway</h1>
-    <p>轻量级 OpenAI 兼容 API 网关</p>
-
-    <div class="links">
-      <a href="/admin.html" class="button primary">
-        管理后台
-      </a>
-      <a href="/health" class="button" target="_blank">
-        健康检查
-      </a>
-      <a href="https://github.com" class="button" target="_blank">
-        文档
-      </a>
+  <main class="landing-wrap">
+    <div class="landing-brand">
+      <div class="brand-mark" aria-hidden="true">M</div>
     </div>
 
-    <div class="status">
-      <div class="status-item">
-        <span class="status-label">服务状态</span>
-        <span class="status-value"><span class="badge">运行中</span></span>
+    <h1 class="landing-title">Monel Gateway</h1>
+    <p class="landing-subtitle">A lightweight, OpenAI-compatible API gateway. Proxy multiple providers behind one endpoint with auth, hot-reload, and live stats.</p>
+
+    <nav class="landing-links" aria-label="Quick links">
+      <a href="/admin.html" class="btn btn-primary">
+        <span class="ms">admin_panel_settings</span>
+        <span>Admin Console</span>
+      </a>
+      <a href="/health" class="btn btn-secondary" target="_blank" rel="noopener">
+        <span class="ms">monitor_heart</span>
+        <span>Health Check</span>
+      </a>
+    </nav>
+
+    <div class="status-card" role="status" aria-live="polite">
+      <div class="status-row">
+        <span class="status-label">Service status</span>
+        <span class="status-value">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Checking</span>
+        </span>
       </div>
-      <div class="status-item">
-        <span class="status-label">版本</span>
-        <span class="status-value">v0.1.0</span>
+      <div class="status-row">
+        <span class="status-label">Version</span>
+        <span class="status-value text-mono">v0.1.0</span>
       </div>
-      <div class="status-item">
-        <span class="status-label">协议</span>
-        <span class="status-value">OpenAI Compatible</span>
+      <div class="status-row">
+        <span class="status-label">Protocol</span>
+        <span class="status-value text-mono">OpenAI Compatible</span>
       </div>
     </div>
-  </div>
+  </main>
 
+  <script src="/app.js"></script>
   <script>
-    // 检查服务健康状态
+    // Probe the gateway health endpoint and reflect status in the UI.
     fetch('/health')
-      .then(res => res.text())
-      .then(data => {
-        console.log('Health check:', data);
+      .then(res => {
+        if (!res.ok) throw new Error('unhealthy');
+        document.getElementById('statusText').textContent = 'Online';
       })
-      .catch(err => {
-        console.error('Health check failed:', err);
-        document.querySelector('.badge').textContent = '离线';
-        document.querySelector('.badge').style.background = '#f44336';
+      .catch(() => {
+        const dot = document.getElementById('statusDot');
+        dot.classList.add('offline');
+        document.getElementById('statusText').textContent = 'Offline';
       });
   </script>
 </body>
